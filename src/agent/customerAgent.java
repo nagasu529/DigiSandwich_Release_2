@@ -1,5 +1,6 @@
 package agent;
 
+import database.DatabaseConn;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -11,7 +12,6 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import ui.customerUI;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -24,9 +24,11 @@ public class customerAgent extends Agent {
 
     // Put agent initializations here
     calcMethod customerInfo = new calcMethod();
-    calcMethod.customerInfo randInput = customerInfo.randCustomerInput(getLocalName());
+    DatabaseConn app = new DatabaseConn();
+    //calcMethod.customerInfo randInput = customerInfo.randCustomerInput(getLocalName());
+    calcMethod.customerInfo weeklyOrder = customerInfo. new customerInfo(getLocalName(),"Hamsandwich","general",100,app.selectProductPrice("Hamsandwich","general"),0,0,0);
     int orderTimer = 0;
-    int[] orderTimerArray = {60000,180000,300000};
+    int[] orderTimerArray = {60000,180000,300000,4200000};
 
     //calcMethod.customerInfo randInput = customerInfo.customerInfo(getLocalName(), " ", " ", 0, 0, 0, "  ", 0);
 
@@ -47,9 +49,10 @@ public class customerAgent extends Agent {
         }
     	
         //put agent name to ArrayList
-        randInput.agentName = getLocalName();
+        //randInput.agentName = getLocalName();
         //Timing for agent environment
-        orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
+        orderTimer = orderTimerArray[orderTimerArray.length -1];
+        //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -75,14 +78,6 @@ public class customerAgent extends Agent {
                 orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
                 //update current stock on list to suppliers.
                 //addBehaviour(new responseToCustomers());
-                calcMethod.customerInfo currentInput = customerInfo.randCustomerInput(getLocalName());
-                randInput.orderName = currentInput.orderName;
-                randInput.ingredientGrade = currentInput.ingredientGrade;
-                randInput.numOfOrder = currentInput.numOfOrder;
-                randInput.pricePerUnit = currentInput.pricePerUnit;
-                randInput.numReply = currentInput.numReply;
-                randInput.orderStatus = currentInput.orderStatus;
-                randInput.utilityValue = currentInput.utilityValue;
                 addBehaviour(new customerAgent.RequestPerformer());
             }
         } );
@@ -121,7 +116,7 @@ public class customerAgent extends Agent {
             for (int j = 0; j < specialistAgent.length; j++) {
                 cfp.addReceiver(specialistAgent[j]);
             }
-            cfp.setContent(randInput.toUpdateService());
+            cfp.setContent(weeklyOrder.toUpdateService());
             cfp.setConversationId("customer");
             cfp.setReplyWith("cfp" + System.currentTimeMillis());
             myAgent.send(cfp);
@@ -150,8 +145,8 @@ public class customerAgent extends Agent {
                 String[] arrOfStr = tempContent.split("-");
                 int numReplyFromSpeciailst = Integer.parseInt(arrOfStr[4]);
                 int replyStatus = Integer.parseInt(arrOfStr[5]);
-                randInput.numReply = numReplyFromSpeciailst;
-                randInput.orderStatus = replyStatus;
+                weeklyOrder.numReply = numReplyFromSpeciailst;
+                weeklyOrder.orderStatus = replyStatus;
 
                 //Date and time testing.
                 LocalDate A = java.time.LocalDate.now();
@@ -164,13 +159,13 @@ public class customerAgent extends Agent {
                 //myGui.displayUI(expired.toString());
 
                 //Updating agent status (dispose or re-send request)
-                if(randInput.numReply == randInput.numOfOrder){
+                if(weeklyOrder.numReply == weeklyOrder.numOfOrder){
                     //myGui.displayUI("Received all order requirement");
                     //myAgent.doSuspend();
 
                 }else {
                     //myGui.displayUI(String.format("\n The reserved order is %d from %d request",randInput.numReply,randInput.numOfOrder));
-                    randInput.numOfOrder = randInput.numOfOrder - randInput.numReply;
+                    weeklyOrder.numOfOrder = weeklyOrder.numOfOrder - weeklyOrder.numReply;
                     //myAgent.doSuspend();
                     //myGui.displayUI(randInput.toStringOutput());
                 }

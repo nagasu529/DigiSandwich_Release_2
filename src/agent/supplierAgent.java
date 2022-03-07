@@ -1,6 +1,5 @@
 package agent;
 
-import ui.supplierUI;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.*;
@@ -12,11 +11,9 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.util.*;
-import java.util.stream.IntStream;
 
-public class breadAgent extends Agent {
+public class supplierAgent extends Agent {
     // The catalogue of supply items (maps the title name to its quantities)
     ArrayList<calcMethod.supplierInfo> sellingProductList = new ArrayList<>();
     calcMethod supplierInfo = new calcMethod();
@@ -81,7 +78,7 @@ public class breadAgent extends Agent {
                 protected void onTick() {
 
                     //adding the one shoot behaviour to check the ingredient stock in database.
-                    addBehaviour(new breadAgent.stopDeliverIngrad());
+                    addBehaviour(new supplierAgent.stopDeliverIngrad());
 
                     System.out.println("Process after 1 minute");
                     if(ingradPolicy == 0){

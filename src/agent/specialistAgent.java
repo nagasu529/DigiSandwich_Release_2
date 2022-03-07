@@ -4,8 +4,6 @@ import database.DatabaseConn;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
 import jade.content.onto.Ontology;
-import jade.content.onto.OntologyException;
-import jade.content.onto.annotations.Element;
 import jade.content.onto.basic.Action;
 import jade.core.AID;
 import jade.core.Agent;
@@ -16,24 +14,16 @@ import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
-import jade.domain.FIPANames;
 import jade.domain.JADEAgentManagement.JADEManagementOntology;
 import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
-import ui.biddingSpecialistUI;
-import ui.specialistUI;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import agent.calcMethod.ingredientTransaction;
 
 
-public class specialistExpireDateAgent extends Agent {
+public class specialistAgent extends Agent {
     //private biddingSpecialistUI myGui;
 
     //Initial Data table and others parameters.
@@ -73,8 +63,8 @@ public class specialistExpireDateAgent extends Agent {
             fe.printStackTrace();
         }
 
-        addBehaviour(new specialistExpireDateAgent.updateIngredientStock());
-        addBehaviour(new specialistExpireDateAgent.containServiceOrder());
+        addBehaviour(new specialistAgent.updateIngredientStock());
+        addBehaviour(new specialistAgent.containServiceOrder());
         
         //The service reply process which is after the end of auction. Agent 
 
@@ -101,7 +91,7 @@ public class specialistExpireDateAgent extends Agent {
                 if(dayTimeCount < 31){
                     dayTimeCount++;
                     addBehaviour(new optimizeOrderFromcurrentStock());
-                    addBehaviour(new specialistExpireDateAgent.stopDeliveryIngrad());
+                    addBehaviour(new specialistAgent.stopDeliveryIngrad());
                 }else{
                     //Shutdown JADE Environment.
                     Codec codec = new SLCodec();
