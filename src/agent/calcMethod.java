@@ -12,7 +12,7 @@ import java.util.*;
 public class calcMethod {
     //ArrayList initialize
     ArrayList<advMatchingArray> extracOrderDataList = new ArrayList<>();
-    ArrayList<String> queulyResult = new ArrayList<>();
+    ArrayList<String> queryResult = new ArrayList<>();
 
     //Related parameter and utility classes.
 
@@ -46,16 +46,16 @@ public class calcMethod {
         //ArrayList<advMatchingArray> extracOrderDataList = new ArrayList<>();
 
         //Getting ingredients data from database(one product needs many ingredients).
-        ArrayList<String> queulyResult = app.selectProduct(orderName);
+        ArrayList<String> queryResult = app.selectProduct(orderName);
 
         //Put the required ingredients to queue (ArrayList queue)
         //The orders has different require ingredients and need to calculate the data before put on queue.
-        for(int i = 0; i < queulyResult.size();i++){
-            if(queulyResult.get(i) != null){
-                double tempQ = app.selectQuantity(orderName, queulyResult.get(i));
+        for(int i = 0; i < queryResult.size();i++){
+            if(queryResult.get(i) != null){
+                double tempQ = app.selectQuantity(orderName, queryResult.get(i));
                 if(tempQ > 0){
-                    //System.out.println("             " + orderName + "  " + queulyResult.get(i) + "   "+ tempQ);
-                    extracOrderDataList.add(new advMatchingArray(queulyResult.get(i), orderGrade, (tempQ * orderQuantity), tempQ, 0, 0, 0, 0));
+                    //System.out.println("             " + orderName + "  " + queryResult.get(i) + "   "+ tempQ);
+                    extracOrderDataList.add(new advMatchingArray(queryResult.get(i), orderGrade, (tempQ * orderQuantity), tempQ, 0, 0, 0, 0,0));
                     //System.out.println("   Upper array:      " + extracOrderDataList.get(i).toStringOutput());
                 }
             }
@@ -154,22 +154,22 @@ public class calcMethod {
         int maxReserved = 0;                          //Final result calculation.
         
         //Getting ingredients data from database.
-        ArrayList<String> queulyResult = app.selectProduct(orderName);
-        for(int i=0; i < queulyResult.size();i++){
-            if(queulyResult.get(i) != null){
+        ArrayList<String> queryResult = app.selectProduct(orderName);
+        for(int i=0; i < queryResult.size();i++){
+            if(queryResult.get(i) != null){
             double gradeANumStock = 0, gradeBNumStock = 0, gradeCNumStock = 0;      //Initialize the all grade of ingredient numstock to calculate.
             double gradeAUsage = 0, gradeBUsage = 0, gradeCUsage = 0;
             int totalResearvedOrder = 0;
             
-            numPerOneProduct = app.selectQuantity(orderName, queulyResult.get(i));          //Selecting ingredients quantity for the piece of product.
+            numPerOneProduct = app.selectQuantity(orderName, queryResult.get(i));          //Selecting ingredients quantity for the piece of product.
             numRequire = numPerOneProduct * orderQuantity;
             double basedNumreq = numRequire;
             //System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx     " + numRequire);
-            //extracOrderDataList.add(new advMatchingArray(queulyResult.get(i), orderGrade, numRequire, numPerOneProduct, 0, 0, 0, 0));
+            //extracOrderDataList.add(new advMatchingArray(queryResult.get(i), orderGrade, numRequire, numPerOneProduct, 0, 0, 0, 0));
             
             //looping to check avalable stock of ingredients.
             for(int j = 0; j < ingredientCurrentList.size(); j++) {
-                if (ingredientCurrentList.get(j).productName.equals(queulyResult.get(i))) {
+                if (ingredientCurrentList.get(j).productName.equals(queryResult.get(i))) {
                     String grade = ingredientCurrentList.get(j).ingredientGrade;
                     switch (grade) {
                         case "A":
@@ -195,7 +195,7 @@ public class calcMethod {
                     }else {
                         gradeAUsage = totalResearvedOrder * numPerOneProduct;
                     }
-                    extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,0,0,totalResearvedOrder));
+                    extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,0,0,0,totalResearvedOrder));
                     break;
 
                 case "B":
@@ -225,7 +225,7 @@ public class calcMethod {
                             }
                     }
                     
-                    extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,0,totalResearvedOrder));
+                    extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,0, 0,totalResearvedOrder));
                     break;
 
                 case "C":
@@ -268,7 +268,7 @@ public class calcMethod {
                         }
                     }
                     
-                    extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,gradeCUsage,totalResearvedOrder));
+                    extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,gradeCUsage, 0,totalResearvedOrder));
                     break;
                 }
             }
@@ -447,15 +447,15 @@ public class calcMethod {
         }
          */
         //Getting ingredients data from database.
-        ArrayList<String> queulyResult = app.selectProduct(orderName);
+        ArrayList<String> queryResult = app.selectProduct(orderName);
         //Put the required ingredients to queue (ArrayList queue)
         //The orders has different require ingredients and need to clean the data before put on queue.
-        for(int i = 0; i < queulyResult.size();i++){
-            if(queulyResult.get(i) != null){
+        for(int i = 0; i < queryResult.size();i++){
+            if(queryResult.get(i) != null){
                 int totalResearvedOrder = 0;
-                double gradeANumStock = 0, gradeBNumStock = 0, gradeCNumStock = 0;      //Initialize the all grade of ingredient numstock to calculate.
-                double gradeAUsage = 0, gradeBUsage = 0, gradeCUsage = 0;
-                numPerOneProduct = app.selectQuantity(orderName, queulyResult.get(i));          //Selecting ingredients quantity for the piece of product.
+                double gradeANumStock = 0, gradeBNumStock = 0, gradeCNumStock = 0,generalGradeNumStock = 0;      //Initialize the all grade of ingredient numstock to calculate.
+                double gradeAUsage = 0, gradeBUsage = 0, gradeCUsage = 0, generalGradeUsage =0;
+                numPerOneProduct = app.selectQuantity(orderName, queryResult.get(i));          //Selecting ingredients quantity for the piece of product.
                 numRequire = numPerOneProduct * orderQuantity;
                 double basedNumreq = numRequire;
                 for(int j = 0; j < ingredientCurrentList.size(); j++) {
@@ -465,8 +465,8 @@ public class calcMethod {
 
                     //adding the ingredient that perfect matching wiht order (same and higher grad that close to expired)
                     //The expired date is from refrigerators that are concerned about product shelf life. It means that the expired date on the sandwich company refrigerator is covered the final product shelf life when they sell it to customers.
-                    if ((ingredientCurrentList.get(j).productName.equals(queulyResult.get(i)) && ingredientCurrentList.get(j).ingredientGrade.equals(orderGrade) && expriedDate > 0) ||
-                    (ingredientCurrentList.get(j).productName.equals(queulyResult.get(i)) && ingredientCurrentList.get(j).ingredientGrade.equals(orderGrade) == false && expriedDate <= 2 && expriedDate > 0)) {
+                    if ((ingredientCurrentList.get(j).productName.equals(queryResult.get(i)) && ingredientCurrentList.get(j).ingredientGrade.equals(orderGrade) && expriedDate > 0) ||
+                    (ingredientCurrentList.get(j).productName.equals(queryResult.get(i)) && ingredientCurrentList.get(j).ingredientGrade.equals(orderGrade) == false && expriedDate <= 2 && expriedDate > 0)) {
                         String grade = ingredientCurrentList.get(j).ingredientGrade;
                         switch (grade) {
                             case "A":
@@ -478,6 +478,8 @@ public class calcMethod {
                             case "C":
                                 gradeCNumStock = gradeCNumStock + ingredientCurrentList.get(j).numOfstock;
                                 break;
+                            case "general":
+                                generalGradeNumStock = generalGradeNumStock + ingredientCurrentList.get(j).numOfstock;
                         }
                         /**
                         if(gradeANumStock !=0 || gradeBNumStock !=0 || gradeCNumStock !=0){
@@ -500,7 +502,7 @@ public class calcMethod {
                         }else {
                             gradeAUsage = totalResearvedOrder * numPerOneProduct;
                         }
-                        extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,0,0,totalResearvedOrder));
+                        extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,0,0,0, totalResearvedOrder));
                         break;
     
                     case "B":
@@ -530,7 +532,7 @@ public class calcMethod {
                                 }
                         }
                         
-                        extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,0,totalResearvedOrder));
+                        extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,0,0, totalResearvedOrder));
                         break;
     
                     case "C":
@@ -573,7 +575,19 @@ public class calcMethod {
                             }
                         }
                         
-                        extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,gradeCUsage,totalResearvedOrder));
+                        extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,gradeCUsage, 0, totalResearvedOrder));
+                        break;
+
+                    case "general":
+                        //System.out.println("Choose general: \n");
+                        totalResearvedOrder = (int) (generalGradeNumStock/numPerOneProduct);
+                        if(totalResearvedOrder >= orderQuantity){
+                            generalGradeUsage = numRequire;
+                            totalResearvedOrder = orderQuantity;
+                        }else {
+                            generalGradeUsage = totalResearvedOrder * numPerOneProduct;
+                        }
+                        extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,0,0,0,- generalGradeUsage, totalResearvedOrder));
                         break;
                     
                 }
@@ -596,7 +610,7 @@ public class calcMethod {
                 extracOrderDataList.get(i).numRequire = maxReserved * extracOrderDataList.get(i).numPerOneProduct;
                 
                 //relaxing ingredient used.
-                double[] tempArray = {extracOrderDataList.get(i).gradCRequire, extracOrderDataList.get(i).gradeBRequire, extracOrderDataList.get(i).gradARequire};
+                double[] tempArray = {extracOrderDataList.get(i).gradCRequire, extracOrderDataList.get(i).gradeBRequire, extracOrderDataList.get(i).gradARequire, extracOrderDataList.get(i).generalGradeRequire};
                 int tempArraylen = tempArray.length;
                 while (tempArraylen > 0){
                     tempArraylen--;
@@ -613,6 +627,7 @@ public class calcMethod {
                 extracOrderDataList.get(i).gradCRequire = tempArray[0];
                 extracOrderDataList.get(i).gradeBRequire = tempArray[1];
                 extracOrderDataList.get(i).gradARequire = tempArray[2];
+                extracOrderDataList.get(i).generalGradeRequire = tempArray[3];
             }else {
                 extracOrderDataList.get(i).numRequire = maxReserved * extracOrderDataList.get(i).numPerOneProduct;
             }
@@ -628,6 +643,7 @@ public class calcMethod {
             double aUpdate = extracOrderDataList.get(i).gradARequire;
             double bUpdate = extracOrderDataList.get(i).gradeBRequire;
             double cUpdate = extracOrderDataList.get(i).gradCRequire;
+            double generalUpdate = extracOrderDataList.get(i).generalGradeRequire;
             for (int j = 0; j < ingredientCurrentList.size();j++){
                 if(ingredientCurrentList.get(j).productName.equals(extracOrderDataList.get(i).ingredientName)){
                     String grade = ingredientCurrentList.get(j).ingredientGrade;
@@ -659,248 +675,12 @@ public class calcMethod {
                                 cUpdate = 0;
                             }
                             break;
-                    }
-                }
-            }
-        }
-        /**
-        for (supplierInfo a : ingredientCurrentList
-        ) {
-            System.out.println("  \nSupplier List Status  " + a.toStringOutput());
-        }
-         */
-
-        extracOrderDataList.clear();
-        extracOrderDataList.trimToSize();
-
-        return maxReserved;
-    }
-
-    public int optimizedAdvExpired (ArrayList<calcMethod.supplierInfo> ingredientCurrentList, String orderName, String orderGrade, int orderQuantity, int dayCount){
-        
-        //ArrayList<advMatchingArray> extracOrderDataList = new ArrayList<>();
-        //Matching order between ingredients need and order requirement.
-        
-        double numPerOneProduct;
-        double numRequire;
-        int maxReserved = 0;                             //Final result calculation.
-        
-        
-        //Getting ingredients data from database and adding on arrayList.
-        //clean the initial arraylist
-
-
-
-
-        //Put the required ingredients to queue (ArrayList queue)
-        //The orders has different require ingredients and need to clean the data before put on queue.
-        for(int i = 0; i < queulyResult.size();i++){
-            if(queulyResult.get(i) != null){
-                int totalResearvedOrder = 0;
-                double gradeANumStock = 0, gradeBNumStock = 0, gradeCNumStock = 0;      //Initialize the all grade of ingredient numstock to calculate.
-                double gradeAUsage = 0, gradeBUsage = 0, gradeCUsage = 0;
-                numPerOneProduct = app.selectQuantity(orderName, queulyResult.get(i));          //Selecting ingredients quantity for the piece of product.
-                numRequire = numPerOneProduct * orderQuantity;
-                double basedNumreq = numRequire;
-                for(int j = 0; j < ingredientCurrentList.size(); j++) {
-                    //looking for the expired data.
-                    int expriedDate = expiredDateCount(ingredientCurrentList.get(j).productName,ingredientCurrentList.get(j).addedToStockDate, dayCount);
-                    //System.out.println(String.format("name %S   grade %s     date to expire    :      %d",ingredientCurrentList.get(j).productName,ingredientCurrentList.get(j).ingredientGrade,expriedDate));
-
-                    //adding the ingredient that perfect matching wiht order (same and higher grad that close to expired)
-                    //The expired date is from refrigerators that are concerned about product shelf life. It means that the expired date on the sandwich company refrigerator is covered the final product shelf life when they sell it to customers.
-                    if ((ingredientCurrentList.get(j).productName.equals(queulyResult.get(i)) && ingredientCurrentList.get(j).ingredientGrade.equals(orderGrade) && expriedDate > 0) ||
-                    (ingredientCurrentList.get(j).productName.equals(queulyResult.get(i)) && ingredientCurrentList.get(j).ingredientGrade.equals(orderGrade) == false && expriedDate <= 2 && expriedDate > 0)) {
-                        String grade = ingredientCurrentList.get(j).ingredientGrade;
-                        switch (grade) {
-                            case "A":
-                                gradeANumStock = gradeANumStock + ingredientCurrentList.get(j).numOfstock;
-                                break;
-                            case "B":
-                                gradeBNumStock = gradeBNumStock + ingredientCurrentList.get(j).numOfstock;
-                                break;
-                            case "C":
-                                gradeCNumStock = gradeCNumStock + ingredientCurrentList.get(j).numOfstock;
-                                break;
-                        }
-                        /**
-                        if(gradeANumStock !=0 || gradeBNumStock !=0 || gradeCNumStock !=0){
-                            System.out.println(String.format("     %f    %f     %f",gradeANumStock,gradeBNumStock,gradeCNumStock));
-                        }else{
-                            System.out.println("\nAll ingredients expired and do not sell any sandwich");
-                        }
-                         */
-                    }
-                }
-                //System.out.printf("Grade A: %s     Grade B: %s       Grade C: %      Before matching      %s%n",gradeANumStock,gradeBNumStock,gradeCNumStock, orderName);
-                
-                switch (orderGrade){
-                    case "A":
-                        //System.out.println("Choose A: \n");
-                        totalResearvedOrder = (int) (gradeANumStock/numPerOneProduct);
-                        if(totalResearvedOrder >= orderQuantity){
-                            gradeAUsage = numRequire;
-                            totalResearvedOrder = orderQuantity;
-                        }else {
-                            gradeAUsage = totalResearvedOrder * numPerOneProduct;
-                        }
-                        extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,0,0,totalResearvedOrder));
-                        break;
-    
-                    case "B":
-                        //System.out.println("Choose B: \n");
-                        //Calculation mehtod on ingrad B grade.
-                        totalResearvedOrder = (int) (gradeBNumStock/numPerOneProduct);
-                        if(totalResearvedOrder >= orderQuantity){
-                            gradeBUsage = orderQuantity * numPerOneProduct;
-                            totalResearvedOrder = orderQuantity;
-                            numRequire = numRequire - gradeBUsage;
-                        }else {
-                            gradeBUsage = totalResearvedOrder * numPerOneProduct;
-                            numRequire = numRequire - gradeBUsage;
-                        }
-    
-                        //calculation method on ingrad A grade.
-                        if(numRequire > 0){
-                            int tempAgradProduct = (int) (gradeANumStock/numPerOneProduct);
-                            if(tempAgradProduct + totalResearvedOrder >= orderQuantity){
-                                gradeAUsage = numRequire;
-                                totalResearvedOrder = orderQuantity;
-                                numRequire = numRequire - gradeAUsage;
-                            }else{
-                                gradeAUsage = tempAgradProduct * numPerOneProduct;
-                                totalResearvedOrder = totalResearvedOrder + tempAgradProduct;
-                                numRequire = numRequire - gradeAUsage;
-                                }
-                        }
-                        
-                        extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,0,totalResearvedOrder));
-                        break;
-    
-                    case "C":
-                        //System.out.println("Choose C: \n");
-                        totalResearvedOrder = (int) (gradeCNumStock/numPerOneProduct);
-                        if(totalResearvedOrder >= orderQuantity){
-                            gradeCUsage = orderQuantity * numPerOneProduct;
-                            totalResearvedOrder = orderQuantity;
-                            numRequire = numRequire - gradeCUsage;
-                        }else {
-                            gradeCUsage = totalResearvedOrder * numPerOneProduct;
-                            numRequire = numRequire - gradeCUsage;
-                        }
-    
-                        //calculation method on ingrad B grade.
-                        if(numRequire > 0){
-                            int tempBgradeProduct = (int) (gradeBNumStock/numPerOneProduct);
-                            if(tempBgradeProduct + totalResearvedOrder >= orderQuantity){
-                                gradeBUsage = numRequire;
-                                totalResearvedOrder = orderQuantity;
-                                numRequire = numRequire - gradeBUsage;
-                            }else{
-                                gradeBUsage = tempBgradeProduct * numPerOneProduct;
-                                totalResearvedOrder = totalResearvedOrder + tempBgradeProduct;
-                                numRequire = numRequire - gradeBUsage;
-                            }
-                        }
-                    
-                        //calculation method on ingrad A grade.
-                        if (numRequire > 0){
-                            int tempAgradProduct = (int) (gradeANumStock/numPerOneProduct);
-                            if(tempAgradProduct + totalResearvedOrder >= orderQuantity){
-                                gradeAUsage = numRequire;
-                                totalResearvedOrder = orderQuantity;
-                                numRequire = numRequire - gradeAUsage;
-                            }else{
-                                gradeAUsage = tempAgradProduct * numPerOneProduct;
-                                totalResearvedOrder = totalResearvedOrder + tempAgradProduct;
-                                numRequire = numRequire - gradeAUsage;
-                            }
-                        }
-                        
-                        extracOrderDataList.add(new advMatchingArray(queulyResult.get(i),orderGrade, basedNumreq,numPerOneProduct,gradeAUsage,gradeBUsage,gradeCUsage,totalResearvedOrder));
-                        break;
-                    
-                }
-            }
-        }
-        Collections.sort(extracOrderDataList, new advMaximumToPrepareOrderSort());      //Find out the maximum reserved product with sorted algorithm.
-        /**
-        for (advMatchingArray a : extracOrderDataList
-        ) {
-            System.out.println("    " + a.toStringOutput());
-        }
-         */
-        
-        //Relaxing order based on the maximum order reserved.
-        for (int i = 0; i < extracOrderDataList.size();i++){
-            maxReserved = extracOrderDataList.get(0).maxTotalProducts;
-            if(maxReserved != extracOrderDataList.get(i).maxTotalProducts){
-                double ingradDiff = (extracOrderDataList.get(i).maxTotalProducts * extracOrderDataList.get(i).numPerOneProduct) - (maxReserved * extracOrderDataList.get(i).numPerOneProduct);
-                extracOrderDataList.get(i).maxTotalProducts = maxReserved;      //adding new max reserved order.
-                extracOrderDataList.get(i).numRequire = maxReserved * extracOrderDataList.get(i).numPerOneProduct;
-                
-                //relaxing ingredient used.
-                double[] tempArray = {extracOrderDataList.get(i).gradCRequire, extracOrderDataList.get(i).gradeBRequire, extracOrderDataList.get(i).gradARequire};
-                int tempArraylen = tempArray.length;
-                while (tempArraylen > 0){
-                    tempArraylen--;
-                    if((tempArray[tempArraylen] - ingradDiff) > 0) {
-                        tempArray[tempArraylen] = tempArray[tempArraylen] - ingradDiff;
-                        ingradDiff = 0;
-                        break;
-                    }else {
-                        ingradDiff = ingradDiff - tempArray[tempArraylen];
-                        tempArray[tempArraylen] = 0;
-                        //tempArray[tempArraylen] = Math.abs(temp);
-                    }
-                }
-                extracOrderDataList.get(i).gradCRequire = tempArray[0];
-                extracOrderDataList.get(i).gradeBRequire = tempArray[1];
-                extracOrderDataList.get(i).gradARequire = tempArray[2];
-            }else {
-                extracOrderDataList.get(i).numRequire = maxReserved * extracOrderDataList.get(i).numPerOneProduct;
-            }
-        }
-        /**
-        for (advMatchingArray a : extracOrderDataList
-        ) {
-            System.out.println("  \nAfter update data  " + a.toStringOutput());
-        }
-         */
-        //Updating ingredients usage to current list of ingredient update.
-        for (int i = 0; i < extracOrderDataList.size();i++){
-            double aUpdate = extracOrderDataList.get(i).gradARequire;
-            double bUpdate = extracOrderDataList.get(i).gradeBRequire;
-            double cUpdate = extracOrderDataList.get(i).gradCRequire;
-            for (int j = 0; j < ingredientCurrentList.size();j++){
-                if(ingredientCurrentList.get(j).productName.equals(extracOrderDataList.get(i).ingredientName)){
-                    String grade = ingredientCurrentList.get(j).ingredientGrade;
-                    switch (grade){
-                        case "A":
-                            if(aUpdate > ingredientCurrentList.get(j).numOfstock){
-                                aUpdate = aUpdate - ingredientCurrentList.get(j).numOfstock;
+                        case "general":
+                            if(generalUpdate > ingredientCurrentList.get(j).numOfstock){
+                                generalUpdate = generalUpdate - ingredientCurrentList.get(j).numOfstock;
                                 ingredientCurrentList.get(j).numOfstock = 0;
-                            }else{
-                                ingredientCurrentList.get(j).numOfstock = ingredientCurrentList.get(j).numOfstock - aUpdate;
-                                aUpdate = 0;
-                            }
-                            break;
-                        case "B":
-                            if(bUpdate > ingredientCurrentList.get(j).numOfstock){
-                                bUpdate = bUpdate - ingredientCurrentList.get(j).numOfstock;
-                                ingredientCurrentList.get(j).numOfstock = 0;
-                            }else{
-                                ingredientCurrentList.get(j).numOfstock = ingredientCurrentList.get(j).numOfstock - bUpdate;
-                                bUpdate = 0;
-                            }
-                            break;
-                        case "C":
-                            if(cUpdate > ingredientCurrentList.get(j).numOfstock){
-                                cUpdate = cUpdate - ingredientCurrentList.get(j).numOfstock;
-                                ingredientCurrentList.get(j).numOfstock = 0;
-                            }else{
-                                ingredientCurrentList.get(j).numOfstock = ingredientCurrentList.get(j).numOfstock - cUpdate;
-                                cUpdate = 0;
+                            }else {
+                                ingredientCurrentList.get(j).numOfstock = ingredientCurrentList.get(j).numOfstock - generalUpdate;
                             }
                             break;
                     }
@@ -919,7 +699,6 @@ public class calcMethod {
 
         return maxReserved;
     }
-
     
     public customerInfo randCustomerInput(String agentName) {
         //Random related variable
@@ -1387,10 +1166,11 @@ public class calcMethod {
         public double gradARequire;
         public double gradeBRequire;
         public double gradCRequire;
+        public double generalGradeRequire;
         public int maxTotalProducts;    //Maximum orders to prepare the pice of product.
 
         public advMatchingArray(String ingredientName, String targetIngredientGrade, double numRequire, double numPerOneProduct, double gradARequire, double gradeBRequire,
-                                double gradCRequire, int maxTotalProducts) {
+                                double gradCRequire, double generalGradeRequire,int maxTotalProducts) {
             this.ingredientName = ingredientName;
             this.targetIngredientGrade = targetIngredientGrade;
             this.numRequire = numRequire;
@@ -1398,12 +1178,13 @@ public class calcMethod {
             this.gradARequire = gradARequire;
             this.gradeBRequire = gradeBRequire;
             this.gradCRequire = gradCRequire;
+            this.generalGradeRequire = generalGradeRequire;
             this.maxTotalProducts = maxTotalProducts;
         }
 
         public String toStringOutput() {
             return String.format("Ingredient name: %s Quality needed: %s Stock require for this order: %.02f num of each unit: %.02f A grade needed: %.02f B grade needed: %.02f C grade needed: %.02f Total product can made: %d",
-                    this.ingredientName, this.targetIngredientGrade, this.numRequire, this.numPerOneProduct, this.gradARequire, this.gradeBRequire, this.gradCRequire, this.maxTotalProducts);
+                    this.ingredientName, this.targetIngredientGrade, this.numRequire, this.numPerOneProduct, this.gradARequire, this.gradeBRequire, this.gradCRequire, this.generalGradeRequire, this.maxTotalProducts);
             /***
              return "Ingredient name: " + this.ingredientName + "   Quality: " + this.ingredientGrade + "   Stock required for this order: " + this.numRequire +
              "  Current from stock: " + this.numCurrentInStock + "  num per 1 product: " + this.numPerOneProduct + "  Maximum pieces for total order: " + df.format(this.maxTotalProducts);

@@ -175,9 +175,6 @@ public class specialistAgent extends Agent {
     //Add a OneShot behavior to update the supplier stock and sending the data to  speciailist.
     private class updateStockFromSupplier extends CyclicBehaviour {
         public void action() {
-            supplierDataList.trimToSize();
-            customerDataList.trimToSize();
-            
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null && msg.getConversationId().equals("Supplier")) {
@@ -312,6 +309,7 @@ public class specialistAgent extends Agent {
             }
             for(Map.Entry<String,Double> pair : dailyUpdate.entrySet()){
                 stockDailyProduct("before",pair.getKey(),pair.getValue(),ingredientTransaction);
+                //System.out.println(pair.getKey() + "   " + pair.getValue());
             }
             dailyUpdate.clear();
 
@@ -331,7 +329,9 @@ public class specialistAgent extends Agent {
                 int numMatchingMethod = 3;
                 
                 int productStockAvalable;
-
+                for(int i = 0; i < supplierDataList.size();i++){
+                    System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" + supplierDataList.get(i).toStringOutput());
+                }
                 //adding matching method name and policy
                 if(numMatchingMethod == 1){
                     productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -342,6 +342,9 @@ public class specialistAgent extends Agent {
                 }else {
                     productStockAvalable = calcMethod.advWithExpireDate(supplierDataList, productName, productGrade, numOfOrder, dayTimeCount);
                     matchingMethod = "advWithExpireDate";
+                    for(int i = 0; i < supplierDataList.size();i++){
+                        System.out.println("ddddddddddddddddddddddddddddddddddddddd" + supplierDataList.get(i).toStringOutput());
+                    }
                 }
 
                 orderTransaction.get(0).HamSandwich_accept = orderTransaction.get(0).HamSandwich_accept + productStockAvalable;
@@ -404,8 +407,10 @@ public class specialistAgent extends Agent {
             //ingredient transaction (after matching).
             for(int i =0; i < supplierDataList.size();i++){
                 if(dailyUpdate.get(supplierDataList.get(i).productName) == null){
+                    System.out.println("AA");
                     dailyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
                 }else {
+                    System.out.println("BB");
                     double tempInMap = dailyUpdate.get(supplierDataList.get(i).productName);
                     double newStock = tempInMap + supplierDataList.get(i).numOfstock;
                     dailyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
@@ -431,11 +436,8 @@ public class specialistAgent extends Agent {
                 }
             }
             System.out.println(String.format(" num of customer: %s  winner: %s  lost: %s  total order: %s  total reject: %s",totalPaticipant,winner, lost, totalOrderReq, totalOrderReject));
-            System.out.println("writtingIngrad     " + writtingIngrad.get(0));
-            //System.out.println(String.format("WB before: %d      after: %d", ingredientTransaction.get(0).WhiteBread, ingredientTransaction.get(0).WhiteBread_after));
-            for (int i = 0; i < supplierDataList.size();i++){
-                System.out.println(supplierDataList.get(i).toStringOutput());
-            }
+            System.out.println(String.format("writtingIngrad     %.2f  %.2f  %.2f",writtingIngrad.get(0), writtingIngrad.get(1), writtingIngrad.get(2)));
+            System.out.println(String.format("WB before: %.2f     after: %.2f", ingredientTransaction.get(0).WhiteBread, ingredientTransaction.get(0).WhiteBread_after));
 
 
 
