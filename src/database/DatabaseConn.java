@@ -18,9 +18,9 @@ public class DatabaseConn {
     //Database connect for calculationg ET0
     private Connection connect(){
         //SQlite connietion string
-        //String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
+        String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
         //String url = "jdbc:sqlite:C:/Users/kitti/VSCode/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office PC classpath
-        String url = "jdbc:sqlite:C:/Users/KChiewchanadmin/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office NB classpath
+        //String url = "jdbc:sqlite:C:/Users/KChiewchanadmin/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office NB classpath
         //String url = "jdbc:sqlite:/Users/nagasu/VSCodeProject/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook VS Code
         Connection conn = null;
         try {
@@ -234,150 +234,62 @@ public class DatabaseConn {
     }
 
     //Insert supplier stock to database.
-    public void insertSupplier(double WhiteBreadA, double WhiteBreadB, double WhiteBreadC, double HamA, double HamB, double HamC, double MatureCheddarMilkA,
-                               double MatureCheddarMilkB, double MatureCheddarMilkC, double OnionA, double OnionB, double OnionC, double PickleA, double PickleB, double PickleC, double TunaA, double TunaB, double TunaC,
-                               double SunflowerSpreadA, double SunflowerSpreadB, double SunflowerSpreadC){
+    public void insertSupplier(double WhiteBread, double Ham, double Onion, double Pickle, double Tuna, double Spread){
         /***
         String sql = String.format("INSERT INTO IngredientResult (%s, WhiteBreadA, WhiteBreadB, WhiteBreadC, HamA, HamB, HamC, MatureCheddarMilkA, MatureCheddarMilkB, MatureCheddarMilkC," +
                 "OnionA, OnionB, OnionC, PickleA, PickleB, PickleC, TunaA, TunaB, TunaC, SunflowerSpreadA, SunflowerSpreadB, SunflowerSpreadC, StockForEachIngrad) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",matchingMethod);
         ***/
-        String sql = "INSERT INTO IngredientResult (WhiteBreadA, WhiteBreadB, WhiteBreadC, HamA, HamB, HamC, MatureCheddarMilkA, MatureCheddarMilkB, MatureCheddarMilkC," +
-                "OnionA, OnionB, OnionC, PickleA, PickleB, PickleC, TunaA, TunaB, TunaC, SunflowerSpreadA, SunflowerSpreadB, SunflowerSpreadC) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-         try{
+        String sql = "INSERT INTO IngredientResult (WhiteBread, Ham, Onion, Pickle, Tuna, Spread) VALUES (?,?,?,?,?,?)";
+        try{
             Connection conn = this.connect();
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setDouble(1,WhiteBreadA);
-            pstmt.setDouble(2, WhiteBreadB);
-            pstmt.setDouble(3,WhiteBreadC);
-            pstmt.setDouble(4,HamA);
-            pstmt.setDouble(5,HamB);
-            pstmt.setDouble(6,HamC);
-            pstmt.setDouble(7,MatureCheddarMilkA);
-            pstmt.setDouble(8,MatureCheddarMilkB);
-            pstmt.setDouble(9,MatureCheddarMilkC);
-            pstmt.setDouble(10,OnionA);
-            pstmt.setDouble(11,OnionB);
-            pstmt.setDouble(12,OnionC);
-            pstmt.setDouble(13,PickleA);
-            pstmt.setDouble(14,PickleB);
-            pstmt.setDouble(15,PickleC);
-            pstmt.setDouble(16,TunaA);
-            pstmt.setDouble(17,TunaB);
-            pstmt.setDouble(18,TunaC);
-            pstmt.setDouble(19,SunflowerSpreadA);
-            pstmt.setDouble(20,SunflowerSpreadB);
-            pstmt.setDouble(21,SunflowerSpreadC);
+            pstmt.setDouble(1,WhiteBread);
+            pstmt.setDouble(2, Ham);
+            pstmt.setDouble(3,Onion);
+            pstmt.setDouble(4,Pickle);
+            pstmt.setDouble(5,Tuna);
+            pstmt.setDouble(6,Spread);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
         }
     }
     //Insert supplier stock to database.
-    public void insertAllResult(double WhiteBreadA, double WhiteBreadA_after, double WhiteBreadB, double WhiteBreadB_after,double WhiteBreadC, double WhiteBreadC_after,double HamA, double HamA_after, double HamB, double HamB_after,
-                                double HamC, double HamC_after, double MatureCheddarMilkA, double MatureCheddarMilkA_after, double MatureCheddarMilkB, double MatureCheddarMilkB_after, double MatureCheddarMilkC, double MatureCheddarMilkC_after,
-                                double OnionA,double OnionA_after, double OnionB, double OnionB_after, double OnionC, double OnionC_after,double PickleA, double PickleA_after, double PickleB, double PickleB_after, double PickleC, double PickleC_after,
-                                double TunaA, double TunaA_after, double TunaB, double TunaB_after, double TunaC, double TunaC_after, double SunflowerSpreadA, double SunflowerSpreadA_after, double SunflowerSpreadB, double SunflowerSpreadB_after,
-                                double SunflowerSpreadC, double SunflowerSpreadC_after){
+    public void insertAllResult(double WhiteBread, double WhiteBread_after, double Ham, double Ham_after,double Onion, double Onion_after,double Pickle, double Pickle_after, double Tuna, double Tuna_after,
+                                double Spread, double Spread_after){
 
-        String sql = "INSERT INTO OverallResult (WhiteBreadA, WhiteBreadA_after, WhiteBreadB, WhiteBreadB_after, WhiteBreadC, WhiteBreadC_after, HamA, HamA_after, HamB, HamB_after, HamC, HamC_after, MatureCheddarMilkA, MatureCheddarMilkA_after,  MatureCheddarMilkB, MatureCheddarMilkB_after," +
-                "MatureCheddarMilkC, MatureCheddarMilkC_after, OnionA, OnionA_after, OnionB, OnionB_after, OnionC, OnionC_after, PickleA, PickleA_after, PickleB, PickleB_after, PickleC, PickleC_after, " +
-                "TunaA, TunaA_after, TunaB, TunaB_after, TunaC, TunaC_after, SunflowerSpreadA, SunflowerSpreadA_after, SunflowerSpreadB, SunflowerSpreadB_after, SunflowerSpreadC, SunflowerSpreadC_after) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+        String sql = "INSERT INTO OverallResult (WhiteBread,WhiteBread_after,Ham,Ham_after,Onion,Onion_after,Pickle,Pickle_after,Tuna,Tuna_after,Spread,Spread_after) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
         try{
             Connection conn = this.connect();
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setDouble(1,WhiteBreadA);
-            pstmt.setDouble(2,WhiteBreadA_after);
-            pstmt.setDouble(3,WhiteBreadB);
-            pstmt.setDouble(4,WhiteBreadB_after);
-            pstmt.setDouble(5,WhiteBreadC);
-            pstmt.setDouble(6,WhiteBreadC_after);
-            pstmt.setDouble(7,HamA);
-            pstmt.setDouble(8,HamA_after);
-            pstmt.setDouble(9,HamB);
-            pstmt.setDouble(10,HamB_after);
-            pstmt.setDouble(11,HamC);
-            pstmt.setDouble(12,HamC_after);
-            pstmt.setDouble(13,MatureCheddarMilkA);
-            pstmt.setDouble(14,MatureCheddarMilkA_after);
-            pstmt.setDouble(15,MatureCheddarMilkB);
-            pstmt.setDouble(16,MatureCheddarMilkB_after);
-            pstmt.setDouble(17,MatureCheddarMilkC);
-            pstmt.setDouble(18,MatureCheddarMilkC_after);
-            pstmt.setDouble(19,OnionA);
-            pstmt.setDouble(20,OnionA_after);
-            pstmt.setDouble(21,OnionB);
-            pstmt.setDouble(22,OnionB_after);
-            pstmt.setDouble(23,OnionC);
-            pstmt.setDouble(24,OnionC_after);
-            pstmt.setDouble(25,PickleA);
-            pstmt.setDouble(26,PickleA_after);
-            pstmt.setDouble(27,PickleB);
-            pstmt.setDouble(28,PickleB_after);
-            pstmt.setDouble(29,PickleC);
-            pstmt.setDouble(30,PickleC_after);
-            pstmt.setDouble(31,TunaA);
-            pstmt.setDouble(32,TunaA_after);
-            pstmt.setDouble(33,TunaB);
-            pstmt.setDouble(34,TunaB_after);
-            pstmt.setDouble(35,TunaC);
-            pstmt.setDouble(36,TunaC_after);
-            pstmt.setDouble(37,SunflowerSpreadA);
-            pstmt.setDouble(38,SunflowerSpreadA_after);
-            pstmt.setDouble(39,SunflowerSpreadB);
-            pstmt.setDouble(40,SunflowerSpreadB_after);
-            pstmt.setDouble(41,SunflowerSpreadC);
-            pstmt.setDouble(42,SunflowerSpreadC_after);
+            pstmt.setDouble(1,WhiteBread);
+            pstmt.setDouble(2,WhiteBread_after);
+            pstmt.setDouble(3,Ham);
+            pstmt.setDouble(4,Ham_after);
+            pstmt.setDouble(5,Onion);
+            pstmt.setDouble(6,Onion_after);
+            pstmt.setDouble(7,Pickle);
+            pstmt.setDouble(8,Pickle_after);
+            pstmt.setDouble(9,Tuna);
+            pstmt.setDouble(10,Tuna_after);
+            pstmt.setDouble(11,Spread);
+            pstmt.setDouble(12,Spread_after);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
         }
     }
-    
-    //Insert data to database (Order transaction).
-    public void orderTransaction(String tableName, int HamCheeseSandwichA_order, int HamCheeseSandwichA_accept, int HamCheeseSandwichB_order, int HamCheeseSandwichB_accept, int HamCheeseSandwichC_order, int HamCheeseSandwichC_accept,
-    int HamSandwichA_order, int HamSandwichA_accept, int HamSandwichB_order, int HamSandwichB_accept, int HamSandwichC_order, int HamSandwichC_accept,
-    int CheeseOnionA_order, int CheeseOnionA_accept, int CheeseOnionB_order, int CheeseOnionB_accept, int CheeseOnionC_order, int CheeseOnionC_accept,
-    int CheesePickleA_order, int CheesePickleA_accept, int CheesePickleB_order, int CheesePickleB_accept, int CheesePickleC_order, int CHeesePickleC_accept,
-    int TunaA_order, int TunaA_accept, int TunaB_order, int TunaB_accept, int TunaC_order, int TunaC_accept){
 
-        String sql = String.format("INSERT INTO %s (HamCheeseSandwichA_order, HamCheeseSandwichA_accept, HamCheeseSandwichB_order, HamCheeseSandwichB_accept, HamCheeseSandwichC_order, HamCheeseSandwichC_accept,"+
-        "HamSandwichA_order, HamSandwichA_accept, HamSandwichB_order, HamSandwichB_accept, HamSandwichC_order, HamSandwichC_accept," + 
-        "CheeseOnionA_order, CheeseOnionA_accept, CheeseOnionB_order, CheeseOnionB_accept, CheeseOnionC_order, CheeseOnionC_accept," + 
-        "CheesePickleA_order, CheesePickleA_accept, CheesePickleB_order, CheesePickleB_accept, CheesePickleC_order, CHeesePickleC_accept,"+
-        "TunaA_order, TunaA_accept, TunaB_order, TunaB_accept, TunaC_order, TunaC_accept) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",tableName);
+    //Insert data to database (Order transaction).
+    public void orderTransaction(String tableName, int HamSandwich_order, int HamSandwich_accept, int HamSandwich_reject){
+
+        String sql = String.format("INSERT INTO %s (HamSandwich_order, HamSandwich_accept, HamSandwich_reject) VALUES (?,?,?)",tableName);
         try{
             Connection conn = this.connect();
             PreparedStatement pstmt = conn.prepareStatement(sql);
-            pstmt.setInt(1,HamCheeseSandwichA_order);
-            pstmt.setInt(2,HamCheeseSandwichA_accept);
-            pstmt.setInt(3, HamCheeseSandwichB_order);
-            pstmt.setInt(4,HamCheeseSandwichB_accept);
-            pstmt.setInt(5, HamCheeseSandwichC_order);
-            pstmt.setInt(6,HamCheeseSandwichC_accept);
-            pstmt.setInt(7,HamSandwichA_order);
-            pstmt.setInt(8, HamSandwichA_accept);
-            pstmt.setInt(9, HamSandwichB_order);
-            pstmt.setInt(10,HamSandwichB_accept);
-            pstmt.setInt(11, HamSandwichC_order);
-            pstmt.setInt(12, HamSandwichC_accept);
-            pstmt.setInt(13,CheeseOnionA_order);
-            pstmt.setInt(14, CheeseOnionA_accept);
-            pstmt.setInt(15,CheeseOnionB_order);
-            pstmt.setInt(16, CheeseOnionB_accept);
-            pstmt.setInt(17, CheeseOnionC_order);
-            pstmt.setInt(18, CheeseOnionC_accept);
-            pstmt.setInt(19, CheesePickleA_order);
-            pstmt.setInt(20, CheesePickleA_accept);
-            pstmt.setInt(21, CheesePickleB_order);
-            pstmt.setInt(22, CheesePickleB_accept);
-            pstmt.setInt(23, CheesePickleC_order);
-            pstmt.setInt(24, CHeesePickleC_accept);
-            pstmt.setInt(25, TunaA_order);
-            pstmt.setInt(26, TunaA_accept);
-            pstmt.setInt(27, TunaB_order);
-            pstmt.setInt(28, TunaB_accept);
-            pstmt.setInt(29, TunaC_order);
-            pstmt.setInt(30, TunaC_accept);
+            pstmt.setInt(1,HamSandwich_order);
+            pstmt.setInt(2,HamSandwich_accept);
+            pstmt.setInt(3, HamSandwich_reject);
             pstmt.executeUpdate();
         } catch (SQLException e) {
             System.out.println(e);
@@ -397,7 +309,24 @@ public class DatabaseConn {
         } catch (SQLException e) {
             System.out.println(e);
         }
+    }
 
+    public void insertWeeklyStock(double WhiteBread, double Ham, double Onion, double Pickle, double Tuna, double Spread){
+
+        String sql = "INSERT INTO IngredientResult (WhiteBread, Ham, Onion, Pickle, Tuna, Spread) VALUES (?,?,?,?,?,?)";
+        try{
+            Connection conn = this.connect();
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setDouble(1,WhiteBread);
+            pstmt.setDouble(2, Ham);
+            pstmt.setDouble(3,Onion);
+            pstmt.setDouble(4,Pickle);
+            pstmt.setDouble(5,Tuna);
+            pstmt.setDouble(6,Spread);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
     }
 
     //delete statement

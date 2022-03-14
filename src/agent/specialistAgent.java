@@ -20,7 +20,7 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.util.*;
 
 
 public class specialistAgent extends Agent {
@@ -30,17 +30,18 @@ public class specialistAgent extends Agent {
 
     ArrayList<calcMethod.supplierInfo> supplierDataList = new ArrayList<>();   //List of available ingredient
     ArrayList<calcMethod.customerInfo> customerDataList = new ArrayList<>();   //List of request orders.
-    //ArrayList<calcMethod.productChecklist> productChecklists = new ArrayList<>();
-    ArrayList<calcMethod.ingredientTable> ingredientWritting = new ArrayList<>();
+    ArrayList<ingredientTable> ingredientWritting = new ArrayList<>();
 
-    ArrayList<calcMethod.orderTransaction> orderTransaction = new ArrayList<>();
-    ArrayList<calcMethod.ingredientTransaction> ingredientTransaction = new ArrayList<>();
+    ArrayList<orderTransaction> orderTransaction = new ArrayList<>();
+    ArrayList<ingredientTransaction> ingredientTransaction = new ArrayList<>();
     ArrayList<Double> writtingIngrad = new ArrayList<>();
 
-    int dayTimeCount = 0;
-
-    DatabaseConn app = new DatabaseConn();
     calcMethod calcMethod = new calcMethod();
+    DatabaseConn app = new DatabaseConn();
+
+    int dayTimeCount = 0;
+    int weekCountTick = 0;
+    int tempdayOfweek = 0;
 
     //Updating agent services
     protected void setup() {
@@ -48,6 +49,8 @@ public class specialistAgent extends Agent {
         // Create and show the GUI
         //myGui = new biddingSpecialistUI(this);
         //myGui.show();
+
+        HashMap<String,Double> weeklyUpdate = new HashMap<String,Double>();
 
         // Register the book-selling service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
@@ -63,13 +66,13 @@ public class specialistAgent extends Agent {
             fe.printStackTrace();
         }
 
-        addBehaviour(new specialistAgent.updateIngredientStock());
-        addBehaviour(new specialistAgent.containServiceOrder());
+        addBehaviour(new specialistAgent.updateStockFromSupplier());
+        addBehaviour(new specialistAgent.receiveOrderFromCustomer());
         
         //The service reply process which is after the end of auction. Agent 
 
         //Add a TickerBehaviour that shows the list of ingredients stock and order queue.
-        addBehaviour(new TickerBehaviour(this, 60000){
+        addBehaviour(new TickerBehaviour(this, 10000){
             protected void onTick() {
                 //update current stock on the list of suppliers.
                 for(int i = 0; i < supplierDataList.size(); i++) {
@@ -87,12 +90,40 @@ public class specialistAgent extends Agent {
                 }
                 */
 
+                if(weekCountTick == 1){
+                    //calculate weekly stock and update to database.
+                    for(int i =0; i < supplierDataList.size();i++){
+                        if(weeklyUpdate.get(supplierDataList.get(i).productName) == null){
+                            weeklyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
+                        }else {
+                            double tempInMap = weeklyUpdate.get(supplierDataList.get(i).productName);
+                            double newStock = tempInMap + supplierDataList.get(i).numOfstock;
+                            weeklyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
+                        }
+                    }
+                    //Writting to database
+                    //app.insertWeeklyStock(weeklyUpdate.get("WhiteBread"), weeklyUpdate.get("Ham"),weeklyUpdate.get("Onion"),weeklyUpdate.get("Pickle"),weeklyUpdate.get("Tuna"),weeklyUpdate.get("Spread"));
+                    weeklyUpdate.clear();
+                    //reset weeklyCountTick to 0.
+                    weekCountTick = 0;
+                }
+
                 //adding time to finish
                 if(dayTimeCount < 31){
                     dayTimeCount++;
+                    tempdayOfweek++;
+                    //weekly counter.
+                    if(tempdayOfweek == 7){
+                        //Active weekly count tick to 1.
+                        weekCountTick = 1;
+                        //reset the tempdayOfweek
+                        tempdayOfweek = 0;
+                    }
+
                     addBehaviour(new optimizeOrderFromcurrentStock());
-                    addBehaviour(new specialistAgent.stopDeliveryIngrad());
                 }else{
+                    //Writting the current ingredient stock before environment is terminated.
+
                     //Shutdown JADE Environment.
                     Codec codec = new SLCodec();
                     Ontology jmo = JADEManagementOntology.getInstance();
@@ -108,7 +139,6 @@ public class specialistAgent extends Agent {
                     }catch (Exception e) {}
                     myAgent.doSuspend();
                 }
-                
             }
         } );
     }
@@ -130,17 +160,20 @@ public class specialistAgent extends Agent {
 
     //Stop delivery ingredient if it has huge stock in manufacture.
     private class stopDeliveryIngrad extends OneShotBehaviour{
-        public  void action(){
-            //Checking the current stock for all ingredients.
+        public void action(){
+            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
+            ACLMessage msg = myAgent.receive(mt);
+            if(msg != null && msg.getConversationId().equals("Specialist")){
 
-            //Sending the PROPOSE message to supplier agents about the delivery stock schedule (refill stock / do not refill).
-            //Clear temporary data before next day matching mechanism process.
+            }else {
+                block();
+            }
         }
     }
 
 
     //Add a OneShot behavior to update the supplier stock and sending the data to  speciailist.
-    private class updateIngredientStock extends CyclicBehaviour {
+    private class updateStockFromSupplier extends CyclicBehaviour {
         public void action() {
             supplierDataList.trimToSize();
             customerDataList.trimToSize();
@@ -148,6 +181,7 @@ public class specialistAgent extends Agent {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null && msg.getConversationId().equals("Supplier")) {
+                System.out.println(msg);
                 String tempContent = msg.getContent();
                 String[] arrOfStr = tempContent.split("-");
                 String tempName = arrOfStr[0];
@@ -156,7 +190,7 @@ public class specialistAgent extends Agent {
                 String tempAgentName = msg.getSender().getLocalName();
 
                 //Writing supplier data.
-                ingredientWritting.add(calcMethod.new ingredientTable(tempName, tempGrade,tempNumOf,0,0));
+                ingredientWritting.add(new ingredientTable(tempName, tempGrade,tempNumOf,0,0));
 
                 //getting and extract the LocalDate
                 LocalDate addedStockDate = LocalDate.parse(String.format("%s-%s-%s",arrOfStr[3],arrOfStr[4],arrOfStr[5]));
@@ -170,7 +204,7 @@ public class specialistAgent extends Agent {
     }
     //Receiving the request order from customers.
 
-    private class containServiceOrder extends CyclicBehaviour{
+    private class receiveOrderFromCustomer extends CyclicBehaviour{
             public void action(){
                 supplierDataList.trimToSize();
                 customerDataList.trimToSize();
@@ -190,11 +224,10 @@ public class specialistAgent extends Agent {
                     int tempNumRequested = Integer.parseInt(arrOfStr[2]);
                     double pricePerUnit = Double.parseDouble(arrOfStr[3]);
                     double productCost = app.selectProductCost(tempName, tempGrade);
-                    double utilityVal = calcMethod.utilityValueCalculation(1,tempNumRequested, pricePerUnit, productCost);
-
+                    double utilityVal = utilityValueCalculation(1,tempNumRequested, pricePerUnit, productCost);
                     //adding the order request to customerList
-                    customerDataList.add(calcMethod.new customerInfo(tempSenderName,tempName,tempGrade,tempNumRequested, pricePerUnit,0,1,utilityVal));
-
+                    customerDataList.add(calcMethod. new customerInfo(tempSenderName,tempName,tempGrade,tempNumRequested, pricePerUnit,0,1,utilityVal));
+                    //System.out.println(customerDataList.get(customerDataList.size() -1).toStringOutput());
                     //Adding the request list in global.
                     //productChecklists.add(calcMethod.new productChecklist(tempName, tempGrade, tempNumRequested, 0));
 
@@ -207,6 +240,7 @@ public class specialistAgent extends Agent {
     //Specialist mechanism to optimize the avalable order and customer demand to maximize
     private class optimizeOrderFromcurrentStock extends OneShotBehaviour{
         AID[] customerList;
+        HashMap<String,Double> dailyUpdate = new HashMap<String,Double>();
         public void action(){
             //memory allocation on arrayList
             orderTransaction.clear();
@@ -260,17 +294,27 @@ public class specialistAgent extends Agent {
             
             //Initialize the order transaction.
             //ArrayList<calcMethod.orderTransaction> orderTransaction = new ArrayList<>();
-            orderTransaction.add(calcMethod.new orderTransaction(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+            orderTransaction.add(new orderTransaction(0,0,0));
             //ArrayList<calcMethod.ingredientTransaction> ingredientTransaction = new ArrayList<>();
-            ingredientTransaction.add(calcMethod.new ingredientTransaction(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+            ingredientTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0));
             
 
 
-            //ingredient transaction loop (before).
-            for (int i = 0; i < supplierDataList.size(); i++){
-                calcMethod.ingradientTransactionBefore(supplierDataList.get(i).productName, supplierDataList.get(i).ingredientGrade, supplierDataList.get(i).numOfstock, ingredientTransaction);
+            //ingredient transaction (before matching).
+            for(int i =0; i < supplierDataList.size();i++){
+                if(dailyUpdate.get(supplierDataList.get(i).productName) == null){
+                    dailyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
+                }else {
+                    double tempInMap = dailyUpdate.get(supplierDataList.get(i).productName);
+                    double newStock = tempInMap + supplierDataList.get(i).numOfstock;
+                    dailyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
+                }
             }
-            
+            for(Map.Entry<String,Double> pair : dailyUpdate.entrySet()){
+                stockDailyProduct("before",pair.getKey(),pair.getValue(),ingredientTransaction);
+            }
+            dailyUpdate.clear();
+
             //Matching mechanism which call the methods from calC class.
             int numLoop = customerDataList.size();
 
@@ -281,7 +325,7 @@ public class specialistAgent extends Agent {
                 String productGrade = customerDataList.get(numLoop).ingredientGrade;
                 int numOfOrder = customerDataList.get(numLoop).numOfOrder;
 
-                calcMethod.orderTransactionReq(productName, productGrade, numOfOrder, orderTransaction);
+                orderTransaction.get(0).HamSandwich_order = orderTransaction.get(0).HamSandwich_order + numOfOrder;
 
                 //int numMatchingMethod = calcMethod.getRandIntRange(1,2);                      //ordering the optimization method.                                                                              
                 int numMatchingMethod = 3;
@@ -300,7 +344,8 @@ public class specialistAgent extends Agent {
                     matchingMethod = "advWithExpireDate";
                 }
 
-                calcMethod.orderTransactionAccept(productName, productGrade, productStockAvalable, orderTransaction);
+                orderTransaction.get(0).HamSandwich_accept = orderTransaction.get(0).HamSandwich_accept + productStockAvalable;
+                orderTransaction.get(0).HamSandwich_reject = numOfOrder - productStockAvalable;
 
                 //Matching market (value only method).
                 //int productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -356,10 +401,20 @@ public class specialistAgent extends Agent {
                 listSize--;
             }
 
-            //ingredient transaction loop (after).
-            for (int i = 0; i < supplierDataList.size(); i++){
-                calcMethod.ingradientTransactionAfter(supplierDataList.get(i).productName, supplierDataList.get(i).ingredientGrade, supplierDataList.get(i).numOfstock, ingredientTransaction);
-            } 
+            //ingredient transaction (after matching).
+            for(int i =0; i < supplierDataList.size();i++){
+                if(dailyUpdate.get(supplierDataList.get(i).productName) == null){
+                    dailyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
+                }else {
+                    double tempInMap = dailyUpdate.get(supplierDataList.get(i).productName);
+                    double newStock = tempInMap + supplierDataList.get(i).numOfstock;
+                    dailyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
+                }
+            }
+            for(Map.Entry<String,Double> pair : dailyUpdate.entrySet()){
+                stockDailyProduct("after",pair.getKey(),pair.getValue(),ingredientTransaction);
+            }
+            dailyUpdate.clear();
 
             //ArrayList<Double> allWritingResult = new ArrayList<>();
             //ArrayList<Double> writtingIngrad = new ArrayList<>();
@@ -375,19 +430,140 @@ public class specialistAgent extends Agent {
                     }
                 }
             }
-            /**
-            for (agent.calcMethod.ingredientTable a : ingredientWritting
-                 ) {
-                System.out.println(a.toString());
+            System.out.println(String.format(" num of customer: %s  winner: %s  lost: %s  total order: %s  total reject: %s",totalPaticipant,winner, lost, totalOrderReq, totalOrderReject));
+            System.out.println("writtingIngrad     " + writtingIngrad.get(0));
+            //System.out.println(String.format("WB before: %d      after: %d", ingredientTransaction.get(0).WhiteBread, ingredientTransaction.get(0).WhiteBread_after));
+            for (int i = 0; i < supplierDataList.size();i++){
+                System.out.println(supplierDataList.get(i).toStringOutput());
             }
-             */
-            /***
-            for(int i = 0; i < writtingIngrad.size();i++){
-                System.out.println(writtingIngrad.get(i));
-            ***/
-            //output.append(matchingMethod);
 
-            
+
+
+
+            /*
+            app.insertResult("MatchingResult", matchingMethod, totalPaticipant,winner,lost,totalOrderReq, totalOrderReject, valueEarning);
+            app.insertSupplier(writtingIngrad.get(0),writtingIngrad.get(1),writtingIngrad.get(2),writtingIngrad.get(3),writtingIngrad.get(4),writtingIngrad.get(5));
+            app.insertAllResult(ingredientTransaction.get(0).WhiteBread,ingredientTransaction.get(0).WhiteBread_after,ingredientTransaction.get(0).Ham,ingredientTransaction.get(0).Ham_after,
+                    ingredientTransaction.get(0).Onion,ingredientTransaction.get(0).Onion_after,ingredientTransaction.get(0).Pickle,ingredientTransaction.get(0).Pickle_after,
+                    ingredientTransaction.get(0).Tuna,ingredientTransaction.get(0).Tuna_after,ingredientTransaction.get(0).Spread,ingredientTransaction.get(0).Spread_after);
+            app.orderTransaction("OrderTransaction", orderTransaction.get(0).HamSandwich_order, orderTransaction.get(0).HamSandwich_accept,orderTransaction.get(0).HamSandwich_reject);
+            */
+
+
+            //writtingIngrad.clear();
+            //orderTransaction.clear();
+            //ingredientTransaction.clear();
+        }
+    }
+    private class ingredientTransaction{
+        public double WhiteBread, WhiteBread_after, Ham, Ham_after, Onion, Onion_after,Pickle, Pickle_after, Tuna, Tuna_after, Spread, Spread_after;
+        public ingredientTransaction(double WhiteBread, double WhiteBread_after, double Ham, double Ham_after, double Onion, double Onion_after,
+                                     double Pickle, double Pickle_after, double Tuna, double Tuna_after, double Spread, double Spread_after){
+            this.WhiteBread = WhiteBread;
+            this.WhiteBread_after = WhiteBread_after;
+            this.Ham = Ham;
+            this.Ham_after = Ham_after;
+            this.Onion = Onion;
+            this.Onion_after = Onion_after;
+            this.Pickle = Pickle;
+            this.Pickle_after = Pickle_after;
+            this.Tuna = Tuna;
+            this.Tuna_after = Tuna_after;
+            this.Spread = Spread;
+            this.Spread_after = Spread_after;
+        }
+    }
+
+    private class orderTransaction{
+        public int HamSandwich_order, HamSandwich_accept, HamSandwich_reject;
+        public orderTransaction(int HamSandwich_order, int HamSandwich_accept, int HamSandwich_reject){
+            this.HamSandwich_order = HamSandwich_order;
+            this.HamSandwich_accept = HamSandwich_accept;
+            this.HamSandwich_reject = HamSandwich_reject;
+        }
+    }
+
+    public class ingredientTable {
+        public String ingredientName;
+        public String ingredientGrade;
+        public double numOfBefore;
+        public double numOfAfter;
+        public double percentage;
+
+
+        public ingredientTable(String ingredientName, String ingredientGrade, double numOfBefore, double numOfAfter, double percentage) {
+            this.ingredientName = ingredientName;
+            this.ingredientGrade = ingredientGrade;
+            this.numOfBefore = numOfBefore;
+            this.numOfAfter = numOfAfter;
+            this.percentage = percentage;
+        }
+        public String toString(){
+            return String.format("Name : %s  Grade: %s Before: %.02f After: %.02f Pct: %.02f", this.ingredientName, this.ingredientGrade, this.numOfBefore, this.numOfAfter, this.percentage);
+        }
+    }
+
+    private void stockDailyProduct(String period, String ingradName, double quantity, ArrayList<ingredientTransaction> ingredientTransaction){
+        switch (period){
+            case "before":
+                if(ingradName == "WhiteBread"){
+                    ingredientTransaction.get(0).WhiteBread = quantity;
+                }else if(ingradName == "Ham"){
+                    ingredientTransaction.get(0).Ham = quantity;
+                }else if(ingradName == "Onion"){
+                    ingredientTransaction.get(0).Onion = quantity;
+                }else if(ingradName == "Pickle"){
+                    ingredientTransaction.get(0).Pickle = quantity;
+                }else if(ingradName == "Tuna"){
+                    ingredientTransaction.get(0).Tuna = quantity;
+                }else if(ingradName == "Spread"){
+                    ingredientTransaction.get(0).Spread = quantity;
+                }
+                break;
+            case "after":
+                if(ingradName == "WhiteBread"){
+                    ingredientTransaction.get(0).WhiteBread_after = quantity;
+                }else if(ingradName == "Ham"){
+                    ingredientTransaction.get(0).Ham_after = quantity;
+                }else if(ingradName == "Onion"){
+                    ingredientTransaction.get(0).Onion_after = quantity;
+                }else if(ingradName == "Pickle"){
+                    ingredientTransaction.get(0).Pickle_after = quantity;
+                }else if(ingradName == "Tuna"){
+                    ingredientTransaction.get(0).Tuna_after = quantity;
+                }else if(ingradName == "Spread"){
+                    ingredientTransaction.get(0).Spread_after = quantity;
+                }
+                break;
+        }
+    }
+
+    private void sellingTransactionDaily(String period, String orderName, int qunatity){
+
+    }
+
+    //Utility function (simple calculation based on the price and value added from all customer request).
+    public double utilityValueCalculation(int utilityMethod, int numOfOrder, double pricePerUnit, double productCost) {
+        double output = 0.0;
+        switch (utilityMethod){
+            case 0:
+                //System.out.println("The utility method is default");
+                output = numOfOrder * pricePerUnit;
+                break;
+            case 1:
+                //System.out.println("The utility method is marginal profit value");
+                double margin = pricePerUnit - productCost;
+                output = numOfOrder * margin;
+                break;
+        }
+
+        return output;
+    }
+}
+
+
+/*
+            previous database saving module.
             app.insertResult("MatchingResult", matchingMethod, totalPaticipant,winner,lost,totalOrderReq, totalOrderReject, valueEarning);
             app.insertSupplier(writtingIngrad.get(0),writtingIngrad.get(1),writtingIngrad.get(2),writtingIngrad.get(3),writtingIngrad.get(4),writtingIngrad.get(5),writtingIngrad.get(6),
                 writtingIngrad.get(7),writtingIngrad.get(8),writtingIngrad.get(9),writtingIngrad.get(10),writtingIngrad.get(11),writtingIngrad.get(12),writtingIngrad.get(13),writtingIngrad.get(14),
@@ -404,53 +580,4 @@ public class specialistAgent extends Agent {
                 orderTransaction.get(0).CheeseOnionA_order, orderTransaction.get(0).CheeseOnionA_accept, orderTransaction.get(0).CheeseOnionB_order, orderTransaction.get(0).CheeseOnionB_accept,orderTransaction.get(0).CheeseOnionC_order, orderTransaction.get(0).CheeseOnionC_accept,
                 orderTransaction.get(0).CheesePickleA_order, orderTransaction.get(0).CheesePickleA_accept, orderTransaction.get(0).CheesePickleB_order, orderTransaction.get(0).CheesePickleB_accept, orderTransaction.get(0).CheesePickleC_order, orderTransaction.get(0).CheesePickleC_accept,
                 orderTransaction.get(0).TunaA_order, orderTransaction.get(0).TunaA_accept, orderTransaction.get(0).TunaB_order, orderTransaction.get(0).TunaB_accept, orderTransaction.get(0).TunaC_order, orderTransaction.get(0).TunaC_accept);
-
-            //writtingIngrad.clear();
-            //orderTransaction.clear();
-            //ingredientTransaction.clear();
-        }
-    }
-
-    /***
-    //Reply process to all customers, update stock and clear the market.
-    private class responseToCustomers extends OneShotBehaviour{
-    	private AID[] customerList;
-        public void action(){
-        	//sorted list to find the highest
-
-        	//Searching specialist agent and created address table.
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sdSearch = new ServiceDescription();
-            sdSearch.setType("customer");
-            template.addServices(sdSearch);
-            try {
-                DFAgentDescription[] searchResult = DFService.search(myAgent, template);
-                customerList = new AID[searchResult.length];
-                for (int j = 0; j < searchResult.length; ++j) {
-                	customerList[j] = searchResult[j].getName();
-                }
-                //System.out.println(specialistAgent[0].getName());
-            } catch (FIPAException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-     */
-}
-
-/**
-//Shutdown JADE Environment.
-Codec codec = new SLCodec();
-Ontology jmo = JADEManagementOntology.getInstance();
-getContentManager().registerLanguage(codec);
-getContentManager().registerOntology(jmo);
-ACLMessage msg = new ACLMessage(ACLMessage.REQUEST);
-msg.addReceiver(getAMS());
-msg.setLanguage(codec.getName());
-msg.setOntology(jmo.getName());
-try {
-    getContentManager().fillContent(msg, new Action(getAID(), new ShutdownPlatform()));
-    send(msg);
-}catch (Exception e) {}
-myAgent.doSuspend();
- */
+            */

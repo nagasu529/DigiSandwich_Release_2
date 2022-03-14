@@ -8,10 +8,11 @@ public class Main {
             String tempText = String.format("customer%d:agent.customerAgent;",i + 1);
             customerStartText.append(tempText);
         }
+
         String[] param = new String[2];
         param[0] = "-gui";
-        param[1] = "specialist:agent.specialistAgent;" + customerStartText;
-        //param[2] = customerStartText.toString();
+        param[1] = "specialist:agent.specialistAgent;supplier:agent.supplierAgent;" + customerStartText;
+        //param[2] = String.valueOf(customerStartText);
         Boot.main(param);
     }
 }

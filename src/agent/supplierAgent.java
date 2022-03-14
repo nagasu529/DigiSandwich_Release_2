@@ -1,5 +1,6 @@
 package agent;
 
+import database.DatabaseConn;
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.*;
@@ -10,16 +11,25 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.*;
 
 public class supplierAgent extends Agent {
+
+    DecimalFormat df = new DecimalFormat("#.##");
+    DatabaseConn app = new DatabaseConn();
+    calcMethod calcMethod = new calcMethod();
+    HashMap weeklyUpdate = new HashMap();
+
     // The catalogue of supply items (maps the title name to its quantities)
-    ArrayList<calcMethod.supplierInfo> sellingProductList = new ArrayList<>();
-    calcMethod supplierInfo = new calcMethod();
-    int orderTimer = 180000;
+    ArrayList<supplierInfo> sellingProductList = new ArrayList<>();
+
+    int orderTimer = 70000;
     int timePeriod = 0;
-    int ingradPolicy = 1;
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -52,64 +62,46 @@ public class supplierAgent extends Agent {
                 fe.printStackTrace();
             }
 
+            //First week intialise for Raynor's stock
+        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",50000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",50000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",50000,1));
 
-            // Add the behaviour serving queries from buyer agents
-            //addBehaviour(new OfferRequestsServer());
+        //auto update stock which follow the updateProduct method(OneShotBehaviour).
 
-            //Sending random data to specialist
-            //Random ingredients data.
-            
-            //int ingradPolicy = supplierInfo.getRandIntRange(4,6);
+        for (int i=0; i < sellingProductList.size();i++){
+            //System.out.println(sellingProductList.get(i).toUpdateService());
+            updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+            weeklyUpdate.put(sellingProductList.get(i).productName,sellingProductList.get(i).numOfstock);
+            sellingProductList.get(i).status = 0;
+        }
 
-            
-            sellingProductList.add(supplierInfo.randSupplierInput(getLocalName(),"WhiteBread", "A",ingradPolicy));
-            sellingProductList.add(supplierInfo.randSupplierInput(getLocalName(),"WhiteBread", "B",ingradPolicy));
-            sellingProductList.add(supplierInfo.randSupplierInput(getLocalName(),"WhiteBread", "C",ingradPolicy));
+        //Add a TickerBehaviour to refill supply.
+        addBehaviour(new TickerBehaviour(this, orderTimer){
+            protected void onTick() {
 
-            //auto update stock which follow the updateProduct method(OneShotBehaviour).
-            for (int i=0; i < sellingProductList.size();i++){
-                //System.out.println(sellingProductList.get(i).toUpdateService());
-                updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-            }
+                //Clearing the weekly stock number.
+                weeklyUpdate.clear();
 
-
-            //Add a TickerBehaviour to refill supply.
-            addBehaviour(new TickerBehaviour(this, orderTimer){
-                protected void onTick() {
-
-                    //adding the one shoot behaviour to check the ingredient stock in database.
-                    addBehaviour(new supplierAgent.stopDeliverIngrad());
-
-                    System.out.println("Process after 1 minute");
-                    if(ingradPolicy == 0){
-                        try {
-                            Thread.sleep(orderTimer);
-                        } catch (InterruptedException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-                    }else {
-                            //System.out.println("Process before activate");
-                        int dayCountIncomming = orderTimer/60000;
-                        timePeriod = timePeriod + dayCountIncomming;
-
-                        for (int i=0; i < sellingProductList.size();i++){
-                            //System.out.println(sellingProductList.get(i).toUpdateService());
-                            updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-                        }
-                        ingradPolicy = 0;
+                //Cheking and update the stock for delivery for next time delivery
+                for (int i=0; i < sellingProductList.size();i++){
+                    if(sellingProductList.get(i).status == 1){
+                        updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                        weeklyUpdate.put(sellingProductList.get(i).productName,sellingProductList.get(i).numOfstock);
                     }
+                    else {
+                        sellingProductList.get(i).numOfstock = 0;
+                        weeklyUpdate.put(sellingProductList.get(i).productName,sellingProductList.get(i).numOfstock);
+                    }
+                    sellingProductList.get(i).status = 0;
                 }
-            } );
-
-
+            }
+        } );
             //doSuspend();
             //myGui.dispose();
             
             // Add the behaviour serving purchase orders from buyer agents
             //addBehaviour(new PurchaseOrdersServer());
-
     }
 
     // Put agent clean-up operations here
@@ -171,39 +163,50 @@ public class supplierAgent extends Agent {
         } );
     }
 
-    private class stopDeliverIngrad extends OneShotBehaviour{
+    private class stopDeliverNextWeek extends OneShotBehaviour{
         public void action(){
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
-            if(msg != null && msg.getConversationId().equals("Supplier")){
-                myAgent.doSuspend();
+            if(msg != null && msg.getConversationId().equals("specialist")){
+                System.out.println(msg);
+                String[] arrOfStr = msg.getContent().split("-");
+                String tempName = arrOfStr[0];
+                int tempNumRequested = Integer.parseInt(arrOfStr[2]);
+                int localChange = sellingProductList.indexOf(tempName);
+                sellingProductList.get(localChange).numOfstock = tempNumRequested;
+                if(sellingProductList.get(localChange).numOfstock == 0){
+                    sellingProductList.get(localChange).status = 0;
+                }else {
+                    sellingProductList.get(localChange).status = 1;
+                }
+
+                //Sending the ACCEPT message to confirm next week order.
+                ACLMessage replyMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
+                replyMsg.setConversationId("reply-to-Specialist");
+                replyMsg.addReceiver(msg.getSender());
+                System.out.print(replyMsg);
+
             }else {
                 block();
             }
         }
     }
 
-    /**
-     Inner class OfferRequestsServer.
-     This is the behaviour used by supplier agents to serve incoming requests from customer agents.
-     The agent replies with a PROPOSE message specifying the price. Otherwise a REFUSE message is
-     sent back.
-     */
-    private class OfferRequestsServer extends CyclicBehaviour {
-        public void action() {
-            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+    private class replyToSpecialist extends OneShotBehaviour{
+        public void action(){
+            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
             ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
-                // CFP Message received. Process it
-                String title = msg.getContent();
-                ACLMessage reply = msg.createReply();
-                myAgent.send(reply);
-            }
-            else {
+            if(msg != null && msg.getConversationId().equals("Specialist")){
+                String[] arrOfStr = msg.getContent().split("-");
+                String tempName = arrOfStr[0];
+                int tempNumRequested = Integer.parseInt(arrOfStr[2]);
+                int localChange = sellingProductList.indexOf(tempName);
+                sellingProductList.get(localChange).numOfstock = tempNumRequested;
+            }else {
                 block();
             }
         }
-    }  // End of inner class OfferRequestsServer
+    }
 
     /**
      Inner class PurchaseOrdersServer.
@@ -213,20 +216,43 @@ public class supplierAgent extends Agent {
      and replies with an INFORM message to notify the buyer that the
      purchase has been sucesfully completed.
      */
-    private class PurchaseOrdersServer extends CyclicBehaviour {
-        public void action() {
-            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.ACCEPT_PROPOSAL);
-            ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
-                // ACCEPT_PROPOSAL Message received. Process it
-                String title = msg.getContent();
-                ACLMessage reply = msg.createReply();
-                myAgent.send(reply);
-            }
-            else {
-                block();
-            }
-        }
-    }  // End of inner class OfferRequestsServer
 
+    private class supplierInfo{
+        public String agentName;
+        public String productName;
+        public String ingredientGrade;
+        public double numOfstock;
+        public int status;
+
+        public supplierInfo(String agentName, String productName, String ingredientGrade, double numOfstock, int status) {
+            this.agentName = agentName;
+            this.productName = productName;
+            this.ingredientGrade = ingredientGrade;
+            this.numOfstock = numOfstock;
+            this.status = status;
+        }
+
+        public String toStringOutput() {
+            return "Agent name: "+ this.agentName + " Ingredient name: " + this.productName + "   Quality: " + this.ingredientGrade + "   Stock: " + df.format(numOfstock) + " Re-stock status: " + this.status;
+        }
+    }
+
+    private class weeklyReport{
+        public double WhiteBread;
+        public double Ham;
+        public double Onion;
+        public double Pickle;
+        public double Tuna;
+        public double Spread;
+
+        public weeklyReport(double WhieBread, double Ham, double Onion, double Pickle, double Tuna, double Spread){
+            this.WhiteBread = WhieBread;
+            this.Ham = Ham;
+            this.Onion = Onion;
+            this.Pickle = Pickle;
+            this.Tuna = Tuna;
+            this.Spread = Spread;
+        }
+    }
 }
+

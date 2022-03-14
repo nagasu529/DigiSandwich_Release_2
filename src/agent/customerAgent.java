@@ -13,26 +13,32 @@ import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
-
-import agent.calcMethod.customerInfo;
+import java.util.ArrayList;
 
 public class customerAgent extends Agent {
     //customerUI myGui;
 
     // Put agent initializations here
-    calcMethod customerInfo = new calcMethod();
+    ArrayList<customerInfo> customerInfo = new ArrayList<>();
     DatabaseConn app = new DatabaseConn();
+    DecimalFormat df = new DecimalFormat("#.##");
+
     //calcMethod.customerInfo randInput = customerInfo.randCustomerInput(getLocalName());
-    calcMethod.customerInfo weeklyOrder = customerInfo. new customerInfo(getLocalName(),"Hamsandwich","general",100,app.selectProductPrice("Hamsandwich","general"),0,0,0);
-    int orderTimer = 0;
-    int[] orderTimerArray = {60000,180000,300000,4200000};
+    int orderTimer = 10000;
+    int timePeriod = 0;
+    int weekCount = 0;
+    //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
     //calcMethod.customerInfo randInput = customerInfo.customerInfo(getLocalName(), " ", " ", 0, 0, 0, "  ", 0);
 
     protected void setup() {
+        //Initialize
+        //customerInfo.add(getLocalName(),"HamSandwich","general",100,app.selectProductPrice("HamSandwich","general"),0,0,0);
+        customerInfo.add(new customerInfo(getLocalName(),"HamSandwich","general",100, app.selectProductPrice("HamSandwich","general"),0,0,0));
 
     	// Register service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
@@ -51,7 +57,6 @@ public class customerAgent extends Agent {
         //put agent name to ArrayList
         //randInput.agentName = getLocalName();
         //Timing for agent environment
-        orderTimer = orderTimerArray[orderTimerArray.length -1];
         //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
         try {
             Thread.sleep(1000);
@@ -70,14 +75,22 @@ public class customerAgent extends Agent {
 
         //System.out.println("Hello! Customer-agent " + getAID().getName() + " is ready.");
         // Customer information detail
-        
+
         addBehaviour(new customerAgent.ReceivedOrderRequest());
 
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
-                orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
+                //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
                 //update current stock on list to suppliers.
                 //addBehaviour(new responseToCustomers());
+                //int dayCountIncomming = orderTimer/20000;
+                timePeriod = timePeriod + 1;
+                if(timePeriod == 7){
+                    weekCount = weekCount + 1;
+                    System.out.println("weekly" + weekCount);
+                    timePeriod = 0;
+                    customerInfo.get(0).numOfOrder = timePeriodShift(0, customerInfo.get(0).numOfOrder,0);
+                }
                 addBehaviour(new customerAgent.RequestPerformer());
             }
         } );
@@ -93,9 +106,6 @@ public class customerAgent extends Agent {
 
     private class RequestPerformer extends OneShotBehaviour{
         private AID[] specialistAgent; //The specialist location contain
-        private MessageTemplate mt; // The template to receive replies
-        //Updating the global specialistAddress
-
         public void action() {
             //Searching for current specialist.
             DFAgentDescription template = new DFAgentDescription();
@@ -116,15 +126,12 @@ public class customerAgent extends Agent {
             for (int j = 0; j < specialistAgent.length; j++) {
                 cfp.addReceiver(specialistAgent[j]);
             }
-            cfp.setContent(weeklyOrder.toUpdateService());
+            cfp.setContent(customerInfo.get(0).toUpdateService());
             cfp.setConversationId("customer");
             cfp.setReplyWith("cfp" + System.currentTimeMillis());
             myAgent.send(cfp);
             //System.out.println(cfp);
 
-            // Prepare the template to get proposals
-            mt = MessageTemplate.and(MessageTemplate.MatchConversationId("buying-request"),
-                    MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
             //myGui.displayUI("Sending request to buy message to specialist:");
             //myGui.displayUI("Request order: " + randInput.toStringOutput());
 
@@ -145,8 +152,8 @@ public class customerAgent extends Agent {
                 String[] arrOfStr = tempContent.split("-");
                 int numReplyFromSpeciailst = Integer.parseInt(arrOfStr[4]);
                 int replyStatus = Integer.parseInt(arrOfStr[5]);
-                weeklyOrder.numReply = numReplyFromSpeciailst;
-                weeklyOrder.orderStatus = replyStatus;
+                customerInfo.get(0).numReply = numReplyFromSpeciailst;
+                customerInfo.get(0).orderStatus = replyStatus;
 
                 //Date and time testing.
                 LocalDate A = java.time.LocalDate.now();
@@ -159,13 +166,13 @@ public class customerAgent extends Agent {
                 //myGui.displayUI(expired.toString());
 
                 //Updating agent status (dispose or re-send request)
-                if(weeklyOrder.numReply == weeklyOrder.numOfOrder){
+                if(customerInfo.get(0).numReply == customerInfo.get(0).numOfOrder){
                     //myGui.displayUI("Received all order requirement");
                     //myAgent.doSuspend();
 
                 }else {
                     //myGui.displayUI(String.format("\n The reserved order is %d from %d request",randInput.numReply,randInput.numOfOrder));
-                    weeklyOrder.numOfOrder = weeklyOrder.numOfOrder - weeklyOrder.numReply;
+                    customerInfo.get(0).numOfOrder = customerInfo.get(0).numOfOrder - customerInfo.get(0).numReply;
                     //myAgent.doSuspend();
                     //myGui.displayUI(randInput.toStringOutput());
                 }
@@ -178,5 +185,61 @@ public class customerAgent extends Agent {
                 block();
             }
         }
+    }
+
+    public class customerInfo{
+        public String agentName;
+        public String orderName;
+        public String ingredientGrade;
+        public int numOfOrder;
+        public double pricePerUnit;
+        public int numReply;
+        public int orderStatus;
+        public double utilityValue;
+
+        public customerInfo(String agentName, String orderName, String ingredientGrade, int numOfOrder, double pricePerUnit,int numReply, int orderStatus, double utilityValue) {
+            this.agentName = agentName;
+            this.orderName = orderName;
+            this.ingredientGrade = ingredientGrade;
+            this.numOfOrder = numOfOrder;
+            this.pricePerUnit = pricePerUnit;
+            this.numReply   = numReply;
+            this.orderStatus = orderStatus;
+            this.utilityValue = utilityValue;
+        }
+
+        public String toStringOutput() {
+            String status;
+            if(this.orderStatus == 0) {
+                status = "Waiting queue";
+            }else if(this.orderStatus == 1){
+                status = "Process";
+            }else if(this.orderStatus == 2){
+                status = "process some order";
+            }
+            else{
+                status = "Done";
+            }
+            return "Agent name: " + this.agentName + " Order name: " + this.orderName + "   Quality: " + this.ingredientGrade +
+                    "   Order requested: " + this.numOfOrder + "  Price per unit: " +  this.pricePerUnit  + "  Order replied: " + this.numReply + "  Order status: " + status + "  Utility value: " + df.format(utilityValue);
+        }
+        public String toUpdateService(){
+
+            return this.orderName + "-" + this.ingredientGrade + "-" + this.numOfOrder + "-" + df.format(this.pricePerUnit) + "-" + this.numReply + "-" + this.orderStatus + "-" + df.format(this.utilityValue);
+        }
+    }
+    private int timePeriodShift(int shiftStatus, int initialUnit, int shiftUnit){
+        int unitPerWeek = 0;
+        if(shiftStatus == 0 & shiftUnit != 0){
+            System.out.println("Shift up status");
+             unitPerWeek = initialUnit + shiftUnit;
+        }else if((shiftStatus == 0 || shiftStatus == 1) & (shiftUnit == 0)){
+            System.out.println("Stable frequency status");
+            unitPerWeek = initialUnit + shiftUnit;
+        } else {
+            System.out.println("Shift down");
+            unitPerWeek = initialUnit - shiftUnit;
+        }
+        return unitPerWeek;
     }
 }
