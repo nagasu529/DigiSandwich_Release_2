@@ -62,7 +62,10 @@ public class supplierAgent extends Agent {
                 fe.printStackTrace();
             }
 
-            //First week intialise for Raynor's stock
+        //prepaired nextWeekIngrad
+        addBehaviour(new nextWeekDelivery());
+
+        //First week intialise for Raynor's stock
         sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",50000,1));
         sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",50000,1));
         sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",50000,1));
@@ -163,28 +166,28 @@ public class supplierAgent extends Agent {
         } );
     }
 
-    private class stopDeliverNextWeek extends OneShotBehaviour{
+    private class nextWeekDelivery extends CyclicBehaviour{
+
         public void action(){
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
-            if(msg != null && msg.getConversationId().equals("specialist")){
-                System.out.println(msg);
+            //System.out.println("Request receiving:  " + msg);
+            if(msg != null && msg.getConversationId().equals("Supplier")){
+                System.out.println("Request receiving:  " + msg);
                 String[] arrOfStr = msg.getContent().split("-");
                 String tempName = arrOfStr[0];
-                int tempNumRequested = Integer.parseInt(arrOfStr[2]);
-                int localChange = sellingProductList.indexOf(tempName);
-                sellingProductList.get(localChange).numOfstock = tempNumRequested;
-                if(sellingProductList.get(localChange).numOfstock == 0){
-                    sellingProductList.get(localChange).status = 0;
-                }else {
-                    sellingProductList.get(localChange).status = 1;
+                double tempNumRequested = Double.parseDouble(arrOfStr[1]);
+                for(int i = 0; i < sellingProductList.size();i++){
+                    if(tempName.equals(sellingProductList.get(i).productName)){
+                        sellingProductList.get(i).numOfstock = tempNumRequested;
+                        sellingProductList.get(i).status = 1;
+                    }
                 }
-
                 //Sending the ACCEPT message to confirm next week order.
                 ACLMessage replyMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                 replyMsg.setConversationId("reply-to-Specialist");
                 replyMsg.addReceiver(msg.getSender());
-                System.out.print(replyMsg);
+                System.out.print("Message from suppliers:  " + replyMsg);
 
             }else {
                 block();

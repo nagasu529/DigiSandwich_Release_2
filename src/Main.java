@@ -11,7 +11,7 @@ public class Main {
 
         String[] param = new String[2];
         param[0] = "-gui";
-        param[1] = "specialist:agent.specialistAgent;supplier:agent.supplierAgent;" + customerStartText;
+        param[1] = " specialist:agent.specialistAgent;supplier:agent.supplierAgent;" + customerStartText;
         //param[2] = String.valueOf(customerStartText);
         Boot.main(param);
     }

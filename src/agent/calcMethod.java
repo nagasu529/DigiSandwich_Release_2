@@ -1,13 +1,16 @@
 package agent;
+import com.opencsv.CSVWriter;
 import database.DatabaseConn;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class calcMethod {
     //ArrayList initialize
@@ -587,7 +590,7 @@ public class calcMethod {
                         }else {
                             generalGradeUsage = totalResearvedOrder * numPerOneProduct;
                         }
-                        extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,0,0,0,- generalGradeUsage, totalResearvedOrder));
+                        extracOrderDataList.add(new advMatchingArray(queryResult.get(i),orderGrade, basedNumreq,numPerOneProduct,0,0,0, generalGradeUsage, totalResearvedOrder));
                         break;
                     
                 }
@@ -630,20 +633,16 @@ public class calcMethod {
                 extracOrderDataList.get(i).generalGradeRequire = tempArray[3];
             }else {
                 extracOrderDataList.get(i).numRequire = maxReserved * extracOrderDataList.get(i).numPerOneProduct;
+
             }
         }
-        /**
-        for (advMatchingArray a : extracOrderDataList
-        ) {
-            System.out.println("  \nAfter update data  " + a.toStringOutput());
-        }
-         */
-        //Updating ingredients usage to current list of ingredient update.
+        //Usaged data update to supplierList.
         for (int i = 0; i < extracOrderDataList.size();i++){
             double aUpdate = extracOrderDataList.get(i).gradARequire;
             double bUpdate = extracOrderDataList.get(i).gradeBRequire;
             double cUpdate = extracOrderDataList.get(i).gradCRequire;
             double generalUpdate = extracOrderDataList.get(i).generalGradeRequire;
+
             for (int j = 0; j < ingredientCurrentList.size();j++){
                 if(ingredientCurrentList.get(j).productName.equals(extracOrderDataList.get(i).ingredientName)){
                     String grade = ingredientCurrentList.get(j).ingredientGrade;
@@ -688,14 +687,19 @@ public class calcMethod {
             }
         }
         /**
+        for (advMatchingArray a : extracOrderDataList
+        ) {
+            System.out.println("  \nAfter update data  " + a.toStringOutput());
+        }
+         */
+        //Updating ingredients usage to current list of ingredient update.
+
+        /**
         for (supplierInfo a : ingredientCurrentList
         ) {
             System.out.println("  \nSupplier List Status  " + a.toStringOutput());
         }
          */
-
-        extracOrderDataList.clear();
-        extracOrderDataList.trimToSize();
 
         return maxReserved;
     }
@@ -1074,11 +1078,17 @@ public class calcMethod {
     }
 
     //Writing output method.
-    public void WriteToFile(String writingContext, String outputPath)
-            throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outputPath, true));
-        //writer.newLine();
-        writer.write(writingContext);
+    public void createCSV(String fileDirectory,String[] recordName) throws IOException {
+        CSVWriter writer = new CSVWriter(new FileWriter(fileDirectory));
+        String[] recordRow = recordName;
+        writer.writeNext(recordRow);
+        writer.close();
+    }
+
+    public void updateCSVFile(String fileDirectory, String[] dataInRow) throws IOException {
+        CSVWriter writer = new CSVWriter(new FileWriter(fileDirectory,true));
+        String[] recordRow = dataInRow;
+        writer.writeNext(recordRow);
         writer.close();
     }
 

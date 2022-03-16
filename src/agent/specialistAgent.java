@@ -1,5 +1,6 @@
 package agent;
 
+import com.opencsv.CSVWriter;
 import database.DatabaseConn;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
@@ -19,6 +20,10 @@ import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -32,7 +37,8 @@ public class specialistAgent extends Agent {
     ArrayList<calcMethod.customerInfo> customerDataList = new ArrayList<>();   //List of request orders.
     ArrayList<ingredientTable> ingredientWritting = new ArrayList<>();
 
-    ArrayList<orderTransaction> orderTransaction = new ArrayList<>();
+    ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weeekly report.
+    ArrayList<weeklyResult> nextWeekReq = new ArrayList<>();
     ArrayList<ingredientTransaction> ingredientTransaction = new ArrayList<>();
     ArrayList<Double> writtingIngrad = new ArrayList<>();
 
@@ -43,6 +49,14 @@ public class specialistAgent extends Agent {
     int weekCountTick = 0;
     int tempdayOfweek = 0;
 
+    //Create CSV file.
+    String dailyResult = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\dailyResult.csv";
+    String[] entry = {"totalPaticipant", "winner", "lost", "totalOrder", "totalOrderReject", "valueEarning", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
+
+    //weekly result classpath
+    String weeklyResultPath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\weeklyResult.csv";
+
+
     //Updating agent services
     protected void setup() {
         //Gui active.
@@ -50,7 +64,26 @@ public class specialistAgent extends Agent {
         //myGui = new biddingSpecialistUI(this);
         //myGui.show();
 
-        HashMap<String,Double> weeklyUpdate = new HashMap<String,Double>();
+        try {
+            calcMethod.createCSV(dailyResult,entry);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        /*
+        try {
+            calcMethod.createCSV(weeklyResultPath,entryWeekly);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
+
+        weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+        //Prepairing the CSV with header (Weekly report)
+        try {
+            String[] entryWeekly = weeklyResult.get(0).indexCSV();
+            calcMethod.createCSV(weeklyResultPath,entryWeekly);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // Register the book-selling service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
@@ -90,27 +123,10 @@ public class specialistAgent extends Agent {
                 }
                 */
 
-                if(weekCountTick == 1){
-                    //calculate weekly stock and update to database.
-                    for(int i =0; i < supplierDataList.size();i++){
-                        if(weeklyUpdate.get(supplierDataList.get(i).productName) == null){
-                            weeklyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
-                        }else {
-                            double tempInMap = weeklyUpdate.get(supplierDataList.get(i).productName);
-                            double newStock = tempInMap + supplierDataList.get(i).numOfstock;
-                            weeklyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
-                        }
-                    }
-                    //Writting to database
-                    //app.insertWeeklyStock(weeklyUpdate.get("WhiteBread"), weeklyUpdate.get("Ham"),weeklyUpdate.get("Onion"),weeklyUpdate.get("Pickle"),weeklyUpdate.get("Tuna"),weeklyUpdate.get("Spread"));
-                    weeklyUpdate.clear();
-                    //reset weeklyCountTick to 0.
-                    weekCountTick = 0;
-                }
-
                 //adding time to finish
                 if(dayTimeCount < 31){
                     dayTimeCount++;
+                    System.out.println(String.format("Day %d ",dayTimeCount));
                     tempdayOfweek++;
                     //weekly counter.
                     if(tempdayOfweek == 7){
@@ -158,17 +174,70 @@ public class specialistAgent extends Agent {
         //System.out.println("Specialist-agent "+getAID().getName()+" terminating.");
     }
 
-    //Stop delivery ingredient if it has huge stock in manufacture.
-    private class stopDeliveryIngrad extends OneShotBehaviour{
+    //Sending the Ingredients request to suppliers base on week n needs in total.
+    private class nextWeekIngradReq extends OneShotBehaviour{
+        private AID[] supplierAgent;
         public void action(){
-            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
-            ACLMessage msg = myAgent.receive(mt);
-            if(msg != null && msg.getConversationId().equals("Specialist")){
-
-            }else {
-                block();
+            //Searching specialist agent and created address table.
+            DFAgentDescription template = new DFAgentDescription();
+            ServiceDescription sdSearch = new ServiceDescription();
+            sdSearch.setType("supply-selling");
+            template.addServices(sdSearch);
+            try {
+                DFAgentDescription[] searchResult = DFService.search(myAgent, template);
+                supplierAgent = new AID[searchResult.length];
+                for (int i = 0; i < searchResult.length; ++i) {
+                    supplierAgent[i] = searchResult[i].getName();
+                    System.out.println("supplier Name: " + supplierAgent[i].getName());
+                }
+            } catch (FIPAException e) {
+                e.printStackTrace();
             }
+            //Message prepairation for all suppliers.
+            ACLMessage serviceSender = new ACLMessage(ACLMessage.PROPOSE);
+            for (int i = 0; i < supplierAgent.length; ++i) {
+                serviceSender.addReceiver(supplierAgent[i]);
+                System.out.println("prepairing propose message: " + supplierAgent[i].getName());
+            }
+            //Updating the ingredient stock.
+            double breadNeed, hamNeed, spreadNeed;
+            if(nextWeekReq.get(0).WhiteBreadNeed > nextWeekReq.get(0).WhiteBread){
+                System.out.println("WB need more");
+                breadNeed = nextWeekReq.get(0).WhiteBreadNeed;
+                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }else {
+                breadNeed = 0;
+                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }
+            if(nextWeekReq.get(0).HamNeed > nextWeekReq.get(0).Ham){
+                hamNeed = nextWeekReq.get(0).HamNeed;
+                serviceSender.setContent("Ham" + "-" + hamNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }else {
+                hamNeed = 0;
+                serviceSender.setContent("Ham" + "-" + hamNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }
+            if(nextWeekReq.get(0).SpreadNeed > nextWeekReq.get(0).Spread){
+                spreadNeed = weeklyResult.get(0).SpreadNeed;
+                serviceSender.setContent("Spread" + "-" + spreadNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }else {
+                spreadNeed = 0;
+                serviceSender.setContent("Spread" + "-" + spreadNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }
+            nextWeekReq.clear();
         }
+
     }
 
 
@@ -178,7 +247,7 @@ public class specialistAgent extends Agent {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null && msg.getConversationId().equals("Supplier")) {
-                System.out.println(msg);
+                //System.out.println(msg);
                 String tempContent = msg.getContent();
                 String[] arrOfStr = tempContent.split("-");
                 String tempName = arrOfStr[0];
@@ -188,6 +257,28 @@ public class specialistAgent extends Agent {
 
                 //Writing supplier data.
                 ingredientWritting.add(new ingredientTable(tempName, tempGrade,tempNumOf,0,0));
+
+                //NumOfIngrad is registered to weeklyArrayList.
+                switch (tempName){
+                    case "WhiteBread":
+                        weeklyResult.get(0).WhiteBread = weeklyResult.get(0).WhiteBread + tempNumOf;
+                        break;
+                    case "Ham":
+                        weeklyResult.get(0).Ham = weeklyResult.get(0).Ham + tempNumOf;
+                        break;
+                    case "Spread":
+                        weeklyResult.get(0).Spread = weeklyResult.get(0).Spread + tempNumOf;
+                        break;
+                    case "Onion":
+                        weeklyResult.get(0).Onion = weeklyResult.get(0).Onion + tempNumOf;
+                        break;
+                    case "Pickle":
+                        weeklyResult.get(0).Pickle = weeklyResult.get(0).Pickle + tempNumOf;
+                        break;
+                    case "Tuna":
+                        weeklyResult.get(0).Tuna = weeklyResult.get(0).Tuna + tempNumOf;
+                        break;
+                }
 
                 //getting and extract the LocalDate
                 LocalDate addedStockDate = LocalDate.parse(String.format("%s-%s-%s",arrOfStr[3],arrOfStr[4],arrOfStr[5]));
@@ -240,7 +331,6 @@ public class specialistAgent extends Agent {
         HashMap<String,Double> dailyUpdate = new HashMap<String,Double>();
         public void action(){
             //memory allocation on arrayList
-            orderTransaction.clear();
             ingredientTransaction.clear();
             
             //summary data stock to contain in database.
@@ -291,11 +381,8 @@ public class specialistAgent extends Agent {
             
             //Initialize the order transaction.
             //ArrayList<calcMethod.orderTransaction> orderTransaction = new ArrayList<>();
-            orderTransaction.add(new orderTransaction(0,0,0));
             //ArrayList<calcMethod.ingredientTransaction> ingredientTransaction = new ArrayList<>();
             ingredientTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0));
-            
-
 
             //ingredient transaction (before matching).
             for(int i =0; i < supplierDataList.size();i++){
@@ -309,7 +396,6 @@ public class specialistAgent extends Agent {
             }
             for(Map.Entry<String,Double> pair : dailyUpdate.entrySet()){
                 stockDailyProduct("before",pair.getKey(),pair.getValue(),ingredientTransaction);
-                //System.out.println(pair.getKey() + "   " + pair.getValue());
             }
             dailyUpdate.clear();
 
@@ -322,16 +408,13 @@ public class specialistAgent extends Agent {
                 String productName = customerDataList.get(numLoop).orderName;
                 String productGrade = customerDataList.get(numLoop).ingredientGrade;
                 int numOfOrder = customerDataList.get(numLoop).numOfOrder;
-
-                orderTransaction.get(0).HamSandwich_order = orderTransaction.get(0).HamSandwich_order + numOfOrder;
+                weeklyResult.get(0).numOfOrder = weeklyResult.get(0).numOfOrder + numOfOrder;
 
                 //int numMatchingMethod = calcMethod.getRandIntRange(1,2);                      //ordering the optimization method.                                                                              
                 int numMatchingMethod = 3;
                 
                 int productStockAvalable;
-                for(int i = 0; i < supplierDataList.size();i++){
-                    System.out.println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" + supplierDataList.get(i).toStringOutput());
-                }
+
                 //adding matching method name and policy
                 if(numMatchingMethod == 1){
                     productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -342,13 +425,11 @@ public class specialistAgent extends Agent {
                 }else {
                     productStockAvalable = calcMethod.advWithExpireDate(supplierDataList, productName, productGrade, numOfOrder, dayTimeCount);
                     matchingMethod = "advWithExpireDate";
-                    for(int i = 0; i < supplierDataList.size();i++){
-                        System.out.println("ddddddddddddddddddddddddddddddddddddddd" + supplierDataList.get(i).toStringOutput());
-                    }
+
                 }
 
-                orderTransaction.get(0).HamSandwich_accept = orderTransaction.get(0).HamSandwich_accept + productStockAvalable;
-                orderTransaction.get(0).HamSandwich_reject = numOfOrder - productStockAvalable;
+                weeklyResult.get(0).numOfAccept = weeklyResult.get(0).numOfAccept + productStockAvalable;
+                weeklyResult.get(0).numOfReject = weeklyResult.get(0).numOfReject + (numOfOrder - productStockAvalable);
 
                 //Matching market (value only method).
                 //int productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -407,10 +488,8 @@ public class specialistAgent extends Agent {
             //ingredient transaction (after matching).
             for(int i =0; i < supplierDataList.size();i++){
                 if(dailyUpdate.get(supplierDataList.get(i).productName) == null){
-                    System.out.println("AA");
                     dailyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
                 }else {
-                    System.out.println("BB");
                     double tempInMap = dailyUpdate.get(supplierDataList.get(i).productName);
                     double newStock = tempInMap + supplierDataList.get(i).numOfstock;
                     dailyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
@@ -435,11 +514,92 @@ public class specialistAgent extends Agent {
                     }
                 }
             }
-            System.out.println(String.format(" num of customer: %s  winner: %s  lost: %s  total order: %s  total reject: %s",totalPaticipant,winner, lost, totalOrderReq, totalOrderReject));
-            System.out.println(String.format("writtingIngrad     %.2f  %.2f  %.2f",writtingIngrad.get(0), writtingIngrad.get(1), writtingIngrad.get(2)));
-            System.out.println(String.format("WB before: %.2f     after: %.2f", ingredientTransaction.get(0).WhiteBread, ingredientTransaction.get(0).WhiteBread_after));
+            String[] rowN = new String[]{String.valueOf(totalPaticipant), String.valueOf(winner), String.valueOf(lost), String.valueOf(totalOrderReq), String.valueOf(totalOrderReject), String.valueOf(valueEarning),
+                    String.valueOf(ingredientTransaction.get(0).WhiteBread),String.valueOf(ingredientTransaction.get(0).WhiteBread_after),String.valueOf(ingredientTransaction.get(0).Ham),String.valueOf(ingredientTransaction.get(0).Ham_after),
+                    String.valueOf(ingredientTransaction.get(0).Onion),String.valueOf(ingredientTransaction.get(0).Onion_after),String.valueOf(ingredientTransaction.get(0).Pickle),String.valueOf(ingredientTransaction.get(0).Pickle_after),
+                    String.valueOf(ingredientTransaction.get(0).Tuna),String.valueOf(ingredientTransaction.get(0).Tuna_after),String.valueOf(ingredientTransaction.get(0).Spread),String.valueOf(ingredientTransaction.get(0).Spread_after)};
+            try {
+                calcMethod.updateCSVFile(dailyResult,rowN);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+            //Weekly writting for Supplier request.
+            if(weekCountTick == 1){
+                //Writing weekly total all incoming.
+                System.out.println("Staring to update the weekly file");
+                nextWeekReq.add(new weeklyResult("",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+                ArrayList<String> queryResult = app.selectProduct("HamSandwich");
+                for(int i = 0; i < queryResult.size();i++) {
+                    if (queryResult.get(i) != null) {
+                        double numPerOneProduct = app.selectQuantity("HamSandwich", queryResult.get(i));
+                        switch (queryResult.get(i)){
+                            case "WhiteBread":
+                                weeklyResult.get(0).WhiteBreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                nextWeekReq.get(0).WhiteBread = weeklyResult.get(0).WhiteBread;
+                                nextWeekReq.get(0).WhiteBreadNeed = weeklyResult.get(0).WhiteBreadNeed;
+                                break;
+                            case "Ham":
+                                weeklyResult.get(0).HamNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                nextWeekReq.get(0).Ham = weeklyResult.get(0).Ham;
+                                nextWeekReq.get(0).HamNeed = weeklyResult.get(0).HamNeed;
+                                break;
+                            case "Spread":
+                                weeklyResult.get(0).SpreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                nextWeekReq.get(0).Spread = weeklyResult.get(0).Spread;
+                                nextWeekReq.get(0).SpreadNeed = weeklyResult.get(0).SpreadNeed;
+                                break;
+                            case "Onion":
+                                weeklyResult.get(0).OnionNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                nextWeekReq.get(0).Onion = weeklyResult.get(0).Onion;
+                                nextWeekReq.get(0).OnionNeed = weeklyResult.get(0).OnionNeed;
+                                break;
+                            case "Pickle":
+                                weeklyResult.get(0).PickleNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                nextWeekReq.get(0).Pickle = weeklyResult.get(0).Pickle;
+                                nextWeekReq.get(0).PickleNeed = weeklyResult.get(0).PickleNeed;
+                                break;
+                            case "Tuna":
+                                weeklyResult.get(0).TunaNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                nextWeekReq.get(0).Tuna = weeklyResult.get(0).Tuna;
+                                nextWeekReq.get(0).TunaNeed = weeklyResult.get(0).TunaNeed;
+                                break;
+                        }
+                    }
+                }
+                //sending the next week request here.
+                addBehaviour(new nextWeekIngradReq());
 
+                //writing data in row.
+                try {
+                    calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(0).rowData());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                //Clear weekly data and creating the new row.
+                weeklyResult.clear();
+                weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+                //reset countTick
+                weekCountTick = 0;
+            }
+            /*
+            if(weekCountTick == 1){
+                //calculate weekly stock and update to database.
+                for(int i =0; i < supplierDataList.size();i++){
+                    if(weeklyUpdate.get(supplierDataList.get(i).productName) == null){
+                        weeklyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
+                    }else {
+                        double tempInMap = weeklyUpdate.get(supplierDataList.get(i).productName);
+                        double newStock = tempInMap + supplierDataList.get(i).numOfstock;
+                        weeklyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
+                    }
+                }
+                //Writting to database
+                //app.insertWeeklyStock(weeklyUpdate.get("WhiteBread"), weeklyUpdate.get("Ham"),weeklyUpdate.get("Onion"),weeklyUpdate.get("Pickle"),weeklyUpdate.get("Tuna"),weeklyUpdate.get("Spread"));
+                weeklyUpdate.clear();
+                //reset weeklyCountTick to 0.
+                weekCountTick = 0;
+            }*/
 
 
             /*
@@ -476,12 +636,44 @@ public class specialistAgent extends Agent {
         }
     }
 
-    private class orderTransaction{
-        public int HamSandwich_order, HamSandwich_accept, HamSandwich_reject;
-        public orderTransaction(int HamSandwich_order, int HamSandwich_accept, int HamSandwich_reject){
-            this.HamSandwich_order = HamSandwich_order;
-            this.HamSandwich_accept = HamSandwich_accept;
-            this.HamSandwich_reject = HamSandwich_reject;
+    private class weeklyResult{
+        public String orderName;
+        public int numOfOrder, numOfAccept, numOfReject;
+        public double WhiteBread, WhiteBreadNeed, Ham, HamNeed, Onion, OnionNeed,Pickle, PickleNeed, Tuna, TunaNeed, Spread, SpreadNeed;
+        public weeklyResult(String orderName, int numOfOrder, int numOfAccept, int numOfReject, double WhiteBread, double WhiteBreadNeed, double Ham, double HamNeed, double Onion, double OnionNeed,
+                            double Pickle, double PickleNeed, double Tuna, double TunaNeed, double Spread, double SpreadNeed  ){
+            this.orderName = orderName;
+            this.numOfOrder = numOfOrder;
+            this.numOfAccept = numOfAccept;
+            this.numOfReject = numOfReject;
+            this.WhiteBread = WhiteBread;
+            this.WhiteBreadNeed = WhiteBreadNeed;
+            this.Ham = Ham;
+            this.HamNeed = HamNeed;
+            this.Onion = Onion;
+            this.OnionNeed = OnionNeed;
+            this.Pickle = Pickle;
+            this.PickleNeed = PickleNeed;
+            this.Tuna = Tuna;
+            this.TunaNeed = TunaNeed;
+            this.Spread = Spread;
+            this.SpreadNeed = SpreadNeed;
+        }
+        public String[] indexCSV(){
+            String[] resultIndex = {"orderName","numOfOrder","numOfaccept","numOfReject","WhiteBread","WhiteBreadNeed","Ham","HamNeed","OnionNeed",
+                    "Onion","Pickle","PickleNeed","Tuna","TunaNeed","Spread","SpreadNeed"};
+            return resultIndex;
+        }
+        public String[] rowData(){
+            String[] result = {String.valueOf(this.orderName),String.valueOf(this.numOfOrder),String.valueOf(this.numOfAccept),String.valueOf(this.numOfReject),
+                    String.valueOf(this.WhiteBread),String.valueOf(this.WhiteBreadNeed),String.valueOf(this.Ham),String.valueOf(this.HamNeed),String.valueOf(this.Onion),
+                    String.valueOf(OnionNeed),String.valueOf(Pickle),String.valueOf(this.PickleNeed),String.valueOf(this.Tuna),String.valueOf(this.TunaNeed),
+                    String.valueOf(this.Spread),String.valueOf(this.SpreadNeed)};
+            return result;
+        }
+        public String toUpdateService(String ingradName){
+            String message = String.format("%s-");
+            return  message;
         }
     }
 
@@ -508,32 +700,32 @@ public class specialistAgent extends Agent {
     private void stockDailyProduct(String period, String ingradName, double quantity, ArrayList<ingredientTransaction> ingredientTransaction){
         switch (period){
             case "before":
-                if(ingradName == "WhiteBread"){
+                if(ingradName.equals("WhiteBread")){
                     ingredientTransaction.get(0).WhiteBread = quantity;
-                }else if(ingradName == "Ham"){
+                }else if(ingradName.equals("Ham")){
                     ingredientTransaction.get(0).Ham = quantity;
-                }else if(ingradName == "Onion"){
+                }else if(ingradName.equals("Onion")){
                     ingredientTransaction.get(0).Onion = quantity;
-                }else if(ingradName == "Pickle"){
+                }else if(ingradName.equals("Pickle")){
                     ingredientTransaction.get(0).Pickle = quantity;
-                }else if(ingradName == "Tuna"){
+                }else if(ingradName.equals("Tuna")){
                     ingredientTransaction.get(0).Tuna = quantity;
-                }else if(ingradName == "Spread"){
+                }else if(ingradName.equals("Spread")){
                     ingredientTransaction.get(0).Spread = quantity;
                 }
                 break;
             case "after":
-                if(ingradName == "WhiteBread"){
+                if(ingradName.equals("WhiteBfread")){
                     ingredientTransaction.get(0).WhiteBread_after = quantity;
-                }else if(ingradName == "Ham"){
+                }else if(ingradName.equals("Ham")){
                     ingredientTransaction.get(0).Ham_after = quantity;
-                }else if(ingradName == "Onion"){
+                }else if(ingradName.equals("Onion")){
                     ingredientTransaction.get(0).Onion_after = quantity;
-                }else if(ingradName == "Pickle"){
+                }else if(ingradName.equals("Pickle")){
                     ingredientTransaction.get(0).Pickle_after = quantity;
-                }else if(ingradName == "Tuna"){
+                }else if(ingradName.equals("Tuna")){
                     ingredientTransaction.get(0).Tuna_after = quantity;
-                }else if(ingradName == "Spread"){
+                }else if(ingradName.equals("Spread")){
                     ingredientTransaction.get(0).Spread_after = quantity;
                 }
                 break;
