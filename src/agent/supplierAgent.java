@@ -66,16 +66,15 @@ public class supplierAgent extends Agent {
         addBehaviour(new nextWeekDelivery());
 
         //First week intialise for Raynor's stock
-        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",50000,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",50000,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",50000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",150000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",150000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",150000,1));
 
         //auto update stock which follow the updateProduct method(OneShotBehaviour).
 
         for (int i=0; i < sellingProductList.size();i++){
             //System.out.println(sellingProductList.get(i).toUpdateService());
             updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-            weeklyUpdate.put(sellingProductList.get(i).productName,sellingProductList.get(i).numOfstock);
             sellingProductList.get(i).status = 0;
         }
 
@@ -90,13 +89,8 @@ public class supplierAgent extends Agent {
                 for (int i=0; i < sellingProductList.size();i++){
                     if(sellingProductList.get(i).status == 1){
                         updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-                        weeklyUpdate.put(sellingProductList.get(i).productName,sellingProductList.get(i).numOfstock);
+                        sellingProductList.get(i).status = 0;
                     }
-                    else {
-                        sellingProductList.get(i).numOfstock = 0;
-                        weeklyUpdate.put(sellingProductList.get(i).productName,sellingProductList.get(i).numOfstock);
-                    }
-                    sellingProductList.get(i).status = 0;
                 }
             }
         } );
@@ -162,6 +156,8 @@ public class supplierAgent extends Agent {
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
 
+                //System.out.println(" \n Service sender from supplier:     " + serviceSender);
+
             }
         } );
     }
@@ -173,7 +169,7 @@ public class supplierAgent extends Agent {
             ACLMessage msg = myAgent.receive(mt);
             //System.out.println("Request receiving:  " + msg);
             if(msg != null && msg.getConversationId().equals("Supplier")){
-                System.out.println("Request receiving:  " + msg);
+                //System.out.println(" \n Request receiving:  " + msg);
                 String[] arrOfStr = msg.getContent().split("-");
                 String tempName = arrOfStr[0];
                 double tempNumRequested = Double.parseDouble(arrOfStr[1]);

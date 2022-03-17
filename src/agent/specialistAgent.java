@@ -197,21 +197,16 @@ public class specialistAgent extends Agent {
             ACLMessage serviceSender = new ACLMessage(ACLMessage.PROPOSE);
             for (int i = 0; i < supplierAgent.length; ++i) {
                 serviceSender.addReceiver(supplierAgent[i]);
-                System.out.println("prepairing propose message: " + supplierAgent[i].getName());
             }
             //Updating the ingredient stock.
             double breadNeed, hamNeed, spreadNeed;
             if(nextWeekReq.get(0).WhiteBreadNeed > nextWeekReq.get(0).WhiteBread){
-                System.out.println("WB need more");
                 breadNeed = nextWeekReq.get(0).WhiteBreadNeed;
                 serviceSender.setContent("WhiteBread" + "-" + breadNeed);
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
             }else {
                 breadNeed = 0;
-                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
             }
             if(nextWeekReq.get(0).HamNeed > nextWeekReq.get(0).Ham){
                 hamNeed = nextWeekReq.get(0).HamNeed;
@@ -220,9 +215,6 @@ public class specialistAgent extends Agent {
                 myAgent.send(serviceSender);
             }else {
                 hamNeed = 0;
-                serviceSender.setContent("Ham" + "-" + hamNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
             }
             if(nextWeekReq.get(0).SpreadNeed > nextWeekReq.get(0).Spread){
                 spreadNeed = weeklyResult.get(0).SpreadNeed;
@@ -231,15 +223,10 @@ public class specialistAgent extends Agent {
                 myAgent.send(serviceSender);
             }else {
                 spreadNeed = 0;
-                serviceSender.setContent("Spread" + "-" + spreadNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
             }
             nextWeekReq.clear();
         }
-
     }
-
 
     //Add a OneShot behavior to update the supplier stock and sending the data to  speciailist.
     private class updateStockFromSupplier extends CyclicBehaviour {
@@ -247,7 +234,7 @@ public class specialistAgent extends Agent {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
             if (msg != null && msg.getConversationId().equals("Supplier")) {
-                //System.out.println(msg);
+                System.out.println(" \n Receive supply from supplier:  " + msg);
                 String tempContent = msg.getContent();
                 String[] arrOfStr = tempContent.split("-");
                 String tempName = arrOfStr[0];
@@ -411,9 +398,14 @@ public class specialistAgent extends Agent {
                 weeklyResult.get(0).numOfOrder = weeklyResult.get(0).numOfOrder + numOfOrder;
 
                 //int numMatchingMethod = calcMethod.getRandIntRange(1,2);                      //ordering the optimization method.                                                                              
-                int numMatchingMethod = 3;
+                int numMatchingMethod = 4;
                 
                 int productStockAvalable;
+
+                System.out.println("\n Before");
+                for(int i = 0; i < supplierDataList.size();i++){
+                    System.out.println("       " + supplierDataList.get(i).toStringOutput());
+                }
 
                 //adding matching method name and policy
                 if(numMatchingMethod == 1){
@@ -422,10 +414,19 @@ public class specialistAgent extends Agent {
                 }else if(numMatchingMethod == 2){
                     productStockAvalable = calcMethod.advMatchingOrder(supplierDataList, productName, productGrade, numOfOrder);
                     matchingMethod = "advMatching";
-                }else {
+                }else if(numMatchingMethod == 3){
                     productStockAvalable = calcMethod.advWithExpireDate(supplierDataList, productName, productGrade, numOfOrder, dayTimeCount);
                     matchingMethod = "advWithExpireDate";
+                }else {
+                    productStockAvalable = calcMethod.newMarketMatching(supplierDataList, productName, productGrade, numOfOrder, dayTimeCount);
+                    matchingMethod = "newMarketMatching";
+                }
 
+                System.out.println(String.format("\n Method:  %s  Day %d  num of accept %d   agent name: %s",matchingMethod, dayTimeCount, productStockAvalable, customerDataList.get(numLoop).agentName));
+
+                System.out.println("\n After");
+                for(int i = 0; i < supplierDataList.size();i++){
+                    System.out.println("       " + supplierDataList.get(i).toStringOutput());
                 }
 
                 weeklyResult.get(0).numOfAccept = weeklyResult.get(0).numOfAccept + productStockAvalable;

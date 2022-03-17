@@ -703,7 +703,101 @@ public class calcMethod {
 
         return maxReserved;
     }
-    
+
+    public int newMarketMatching (ArrayList<calcMethod.supplierInfo> ingredientCurrentList, String orderName, String orderGrade, int orderQuantity, int dayCount){
+        //ingredientCurrentList.trimToSize();
+        //Initialize data and array for calculation method.
+        //ArrayList<advMatchingArray> extracOrderDataList = new ArrayList<>();
+        //Matching order between ingredients need and order requirement.
+        HashMap<String,Double> numPeringradList = new HashMap<>();
+        int maxReserved = orderQuantity;                             //Final production request.
+        /**
+         for (supplierInfo a : ingredientCurrentList
+         ) {
+         System.out.println("  \nSupplier List Status (before)  " + a.toStringOutput());
+         }
+         */
+        //Getting ingredients data from database.
+        ArrayList<String> queryResult = app.selectProduct(orderName);
+        for(int i = 0; i < queryResult.size();i++){
+            if(queryResult.get(i) != null){
+                double numPerOneProduct = app.selectQuantity(orderName, queryResult.get(i));          //Selecting ingredients quantity for the piece of product.
+                numPeringradList.put(queryResult.get(i),numPerOneProduct);
+            }
+        }
+
+        ArrayList<Integer> maxProduceArray = new ArrayList<Integer>();
+        for(Map.Entry<String,Double> pair : numPeringradList.entrySet()) {
+            String ingradName = pair.getKey();
+            double numPerOneProduct = pair.getValue();
+            double numReq = numPerOneProduct * orderQuantity;
+            double totalCurrentIngrad = 0;
+            for (int j = 0; j < ingredientCurrentList.size(); j++) {
+                if (ingredientCurrentList.get(j).productName.equals(ingradName)) {
+                    totalCurrentIngrad = totalCurrentIngrad + ingredientCurrentList.get(j).numOfstock;
+                }
+            }
+            System.out.println(String.format("\n total Current ingrad: %s    stock: %.2f",ingradName,totalCurrentIngrad));
+
+            //Maximum product calculation
+            int maxProduce = (int) (totalCurrentIngrad/numPerOneProduct);
+            maxProduceArray.add(maxProduce);
+            System.out.print(String.format("\n max produce for %s    is  %d",ingradName,maxProduce));
+            if(maxProduce < maxReserved){
+                maxReserved = maxProduce;
+            }
+        }
+
+        System.out.println("\n Max reserve is " + maxReserved);
+
+        /*
+        //Put the required ingredients to queue (ArrayList queue)
+        //The orders has different require ingredients and need to clean the data before put on queue.
+        for(int i = 0; i < queryResult.size();i++){
+            if(queryResult.get(i) != null){
+                double generalGradeNumStock = 0;    //Initialize the all grade of ingredient numstock to calculate.
+                //adding ingradList with numPerProduct to Hash table.
+                double numPerOneProduct = app.selectQuantity(orderName, queryResult.get(i));          //Selecting ingredients quantity for the piece of product.
+                numPeringradList.put(queryResult.get(i),numPerOneProduct);
+                for(int j = 0; j < ingredientCurrentList.size(); j++) {
+                    //looking for the expired data.
+                    int expriedDate = expiredDateCount(ingredientCurrentList.get(j).productName,ingredientCurrentList.get(j).addedToStockDate, dayCount);
+                    //adding the ingredient that perfect matching wiht order (same and higher grad that close to expired)
+                    //The expired date is from refrigerators that are concerned about product shelf life. It means that the expired date on the sandwich company refrigerator is covered the final product shelf life when they sell it to customers.
+                    if (ingredientCurrentList.get(j).productName.equals(queryResult.get(i)) && expriedDate > 0) {
+                        generalGradeNumStock = generalGradeNumStock + ingredientCurrentList.get(j).numOfstock;
+                    }
+                    //System.out.println("current Stock: " + queryResult.get(i) + "     " + generalGradeNumStock);
+                }
+                int tempReserveOrder = (int) (generalGradeNumStock/numPerOneProduct);
+                //System.out.println(" Max Reserve: " + tempReserveOrder);
+                if (tempReserveOrder < maxReserved){
+                    maxReserved = tempReserveOrder;         //Maximize max order production based on current stock ingredients.
+                }
+            }
+        }
+        */
+        //Produced order and update the current ingredient stock after production process.(modified relaxing list)
+        for(Map.Entry<String,Double> pair : numPeringradList.entrySet()){
+            String ingradName = pair.getKey();
+            double numPerOneProduct = pair.getValue();
+            double numReq = numPerOneProduct * maxReserved;
+            for (int i = 0; i < ingredientCurrentList.size();i++) {
+                if(ingredientCurrentList.get(i).productName.equals(ingradName)){
+                    if((numReq > ingredientCurrentList.get(i).numOfstock)){
+                        numReq = numReq - ingredientCurrentList.get(i).numOfstock;
+                        ingredientCurrentList.get(i).numOfstock = 0;
+                    }else {
+                        ingredientCurrentList.get(i).numOfstock = ingredientCurrentList.get(i).numOfstock - numReq;
+                    }
+                }
+            }
+        }
+
+        return maxReserved;
+    }
+
+
     public customerInfo randCustomerInput(String agentName) {
         //Random related variable
         String[] randOrder = app.selectProductRandom();

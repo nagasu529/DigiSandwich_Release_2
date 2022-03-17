@@ -31,6 +31,7 @@ public class customerAgent extends Agent {
     int orderTimer = 10000;
     int timePeriod = 0;
     int weekCount = 0;
+    int initOrder = 0;
     //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
     //calcMethod.customerInfo randInput = customerInfo.customerInfo(getLocalName(), " ", " ", 0, 0, 0, "  ", 0);
@@ -76,10 +77,11 @@ public class customerAgent extends Agent {
         //System.out.println("Hello! Customer-agent " + getAID().getName() + " is ready.");
         // Customer information detail
 
-        addBehaviour(new customerAgent.ReceivedOrderRequest());
+        //addBehaviour(new customerAgent.ReceivedOrderRequest());
 
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
+                initOrder = customerInfo.get(0).numOfOrder;
                 //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
                 //update current stock on list to suppliers.
                 //addBehaviour(new responseToCustomers());
@@ -89,7 +91,8 @@ public class customerAgent extends Agent {
                     weekCount = weekCount + 1;
                     System.out.println("weekly" + weekCount);
                     timePeriod = 0;
-                    customerInfo.get(0).numOfOrder = timePeriodShift(0, customerInfo.get(0).numOfOrder,0);
+                    customerInfo.get(0).numOfOrder = timePeriodShift(0, initOrder,10);
+                    initOrder = customerInfo.get(0).numOfOrder;
                 }
                 addBehaviour(new customerAgent.RequestPerformer());
             }
