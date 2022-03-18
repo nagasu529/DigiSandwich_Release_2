@@ -66,9 +66,9 @@ public class supplierAgent extends Agent {
         addBehaviour(new nextWeekDelivery());
 
         //First week intialise for Raynor's stock
-        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",50000,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",50000,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",50000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",100000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",100000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",100000,1));
 
         //auto update stock which follow the updateProduct method(OneShotBehaviour).
 

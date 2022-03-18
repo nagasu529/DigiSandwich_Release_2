@@ -219,7 +219,7 @@ public class specialistAgent extends Agent {
                 hamNeed = 0;
             }
             if(nextWeekReq.get(0).SpreadNeed > nextWeekReq.get(0).Spread){
-                spreadNeed = weeklyResult.get(0).SpreadNeed;
+                spreadNeed = nextWeekReq.get(0).SpreadNeed;
                 serviceSender.setContent("Spread" + "-" + spreadNeed);
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
