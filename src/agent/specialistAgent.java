@@ -205,6 +205,7 @@ public class specialistAgent extends Agent {
                 serviceSender.setContent("WhiteBread" + "-" + breadNeed);
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
+                System.out.println(serviceSender);
             }else {
                 breadNeed = 0;
             }
@@ -213,6 +214,7 @@ public class specialistAgent extends Agent {
                 serviceSender.setContent("Ham" + "-" + hamNeed);
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
+                System.out.println(serviceSender);
             }else {
                 hamNeed = 0;
             }
@@ -221,6 +223,7 @@ public class specialistAgent extends Agent {
                 serviceSender.setContent("Spread" + "-" + spreadNeed);
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
+                System.out.println(serviceSender);
             }else {
                 spreadNeed = 0;
             }

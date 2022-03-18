@@ -82,6 +82,8 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
                 initOrder = customerInfo.get(0).numOfOrder;
+                customerInfo.get(0).numOfOrder = timePeriodShift(0, initOrder,10);
+                initOrder = customerInfo.get(0).numOfOrder;
                 //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
                 //update current stock on list to suppliers.
                 //addBehaviour(new responseToCustomers());
@@ -90,9 +92,9 @@ public class customerAgent extends Agent {
                 if(timePeriod == 7){
                     weekCount = weekCount + 1;
                     System.out.println("weekly" + weekCount);
+                    //customerInfo.get(0).numOfOrder = timePeriodShift(2, initOrder,10);
+                    //initOrder = customerInfo.get(0).numOfOrder;
                     timePeriod = 0;
-                    customerInfo.get(0).numOfOrder = timePeriodShift(0, initOrder,10);
-                    initOrder = customerInfo.get(0).numOfOrder;
                 }
                 addBehaviour(new customerAgent.RequestPerformer());
             }
