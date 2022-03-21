@@ -9,8 +9,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class calcMethod {
     //ArrayList initialize
@@ -37,6 +35,29 @@ public class calcMethod {
         }
         return rand.nextDouble() * (max - min) + min;
     }
+
+    //Num of day conver to Mon-Sun.
+    public String dayInWeek(int numOfday) {
+        int result = numOfday % 7;
+        String dayString = null;
+        if(result == 0){
+            dayString = "Sunday";
+        }else if(result == 1){
+            dayString = "Monday";
+        }else if(result == 2){
+            dayString = "Tuesday";
+        }else if(result == 3){
+            dayString = "Wednesday";
+        }else if(result == 4){
+            dayString = "Thursday";
+        }else if(result == 5){
+            dayString = "Friday";
+        }else {
+            dayString = "Saturday";
+        }
+        return dayString;
+    }
+
 
     //Matching request order method.
     public int matchingOrder (ArrayList<calcMethod.supplierInfo> ingredientCurrentList, String orderName, String orderGrade, int orderQuantity){

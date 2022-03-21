@@ -46,15 +46,17 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     int dayTimeCount = 0;
-    int weekCountTick = 0;
-    int tempdayOfweek = 0;
 
-    //Create CSV file.
-    String dailyResult = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\dailyResult.csv";
-    String[] entry = {"totalPaticipant", "winner", "lost", "totalOrder", "totalOrderReject", "valueEarning", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
+    //Create CSV classpath.
+    //Home PC classpath.
+    //String dailyResult = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\dailyResult.csv";
+    //String weeklyResultPath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\weeklyResult.csv";
 
-    //weekly result classpath
-    String weeklyResultPath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\weeklyResult.csv";
+    //OSX classpath.
+    String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
+    String weeklyResultPath = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/weekly.csv";
+
+    String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
 
     //Updating agent services
@@ -126,7 +128,8 @@ public class specialistAgent extends Agent {
                 //adding time to finish
                 if(dayTimeCount < 31){
                     dayTimeCount++;
-                    System.out.println(String.format("Day %d ",dayTimeCount));
+                    System.out.println(String.format("Day %d is %s",dayTimeCount, calcMethod.dayInWeek(dayTimeCount)));
+                    /*
                     tempdayOfweek++;
                     //weekly counter.
                     if(tempdayOfweek == 7){
@@ -135,6 +138,7 @@ public class specialistAgent extends Agent {
                         //reset the tempdayOfweek
                         tempdayOfweek = 0;
                     }
+                     */
 
                     addBehaviour(new optimizeOrderFromcurrentStock());
                 }else{
@@ -372,7 +376,7 @@ public class specialistAgent extends Agent {
             //Initialize the order transaction.
             //ArrayList<calcMethod.orderTransaction> orderTransaction = new ArrayList<>();
             //ArrayList<calcMethod.ingredientTransaction> ingredientTransaction = new ArrayList<>();
-            ingredientTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0));
+            ingredientTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
 
             //ingredient transaction (before matching).
             for(int i =0; i < supplierDataList.size();i++){
@@ -434,6 +438,10 @@ public class specialistAgent extends Agent {
 
                 weeklyResult.get(0).numOfAccept = weeklyResult.get(0).numOfAccept + productStockAvalable;
                 weeklyResult.get(0).numOfReject = weeklyResult.get(0).numOfReject + (numOfOrder - productStockAvalable);
+
+                ingredientTransaction.get(0).numOfOrder = ingredientTransaction.get(0).numOfOrder + numOfOrder;
+                ingredientTransaction.get(0).numOfAccept = ingredientTransaction.get(0).numOfAccept + productStockAvalable;
+                ingredientTransaction.get(0).numOfReject = ingredientTransaction.get(0).numOfReject + (numOfOrder - productStockAvalable);
 
                 //Matching market (value only method).
                 //int productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -518,18 +526,17 @@ public class specialistAgent extends Agent {
                     }
                 }
             }
-            String[] rowN = new String[]{String.valueOf(totalPaticipant), String.valueOf(winner), String.valueOf(lost), String.valueOf(totalOrderReq), String.valueOf(totalOrderReject), String.valueOf(valueEarning),
-                    String.valueOf(ingredientTransaction.get(0).WhiteBread),String.valueOf(ingredientTransaction.get(0).WhiteBread_after),String.valueOf(ingredientTransaction.get(0).Ham),String.valueOf(ingredientTransaction.get(0).Ham_after),
-                    String.valueOf(ingredientTransaction.get(0).Onion),String.valueOf(ingredientTransaction.get(0).Onion_after),String.valueOf(ingredientTransaction.get(0).Pickle),String.valueOf(ingredientTransaction.get(0).Pickle_after),
-                    String.valueOf(ingredientTransaction.get(0).Tuna),String.valueOf(ingredientTransaction.get(0).Tuna_after),String.valueOf(ingredientTransaction.get(0).Spread),String.valueOf(ingredientTransaction.get(0).Spread_after)};
+            // adding totalPaticipant, winner, lost
+            ingredientTransaction.get(0).totalPaticipant = totalPaticipant;
+
             try {
-                calcMethod.updateCSVFile(dailyResult,rowN);
+                calcMethod.updateCSVFile(dailyResult,ingredientTransaction.get(0).rowData());
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
+            String day = calcMethod.dayInWeek(dayTimeCount);
             //Weekly writting for Supplier request.
-            if(weekCountTick == 1){
+            if(day.equals("Sunday")){
                 //Writing weekly total all incoming.
                 System.out.println("Staring to update the weekly file");
                 nextWeekReq.add(new weeklyResult("",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
@@ -584,7 +591,7 @@ public class specialistAgent extends Agent {
                 weeklyResult.clear();
                 weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
                 //reset countTick
-                weekCountTick = 0;
+                //weekCountTick = 0;
             }
             /*
             if(weekCountTick == 1){
@@ -622,9 +629,14 @@ public class specialistAgent extends Agent {
         }
     }
     private class ingredientTransaction{
+        public int totalPaticipant, numOfOrder,numOfAccept, numOfReject;
         public double WhiteBread, WhiteBread_after, Ham, Ham_after, Onion, Onion_after,Pickle, Pickle_after, Tuna, Tuna_after, Spread, Spread_after;
-        public ingredientTransaction(double WhiteBread, double WhiteBread_after, double Ham, double Ham_after, double Onion, double Onion_after,
+        public ingredientTransaction(int totalPaticipant, int numOfOrder, int numOfAccept,int numOfReject,int WhiteBread, double WhiteBread_after, double Ham, double Ham_after, double Onion, double Onion_after,
                                      double Pickle, double Pickle_after, double Tuna, double Tuna_after, double Spread, double Spread_after){
+            this.totalPaticipant = totalPaticipant;
+            this.numOfOrder = numOfOrder;
+            this.numOfAccept = numOfAccept;
+            this.numOfReject = numOfReject;
             this.WhiteBread = WhiteBread;
             this.WhiteBread_after = WhiteBread_after;
             this.Ham = Ham;
@@ -638,6 +650,18 @@ public class specialistAgent extends Agent {
             this.Spread = Spread;
             this.Spread_after = Spread_after;
         }
+        public String[] indexCSV(){
+            String[] resultIndex = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
+            return resultIndex;
+        }
+        public String[] rowData(){
+            String[] result = {String.valueOf(this.totalPaticipant),String.valueOf(this.numOfOrder),String.valueOf(this.numOfAccept),String.valueOf(this.numOfReject),
+                    String.valueOf(this.WhiteBread),String.valueOf(this.WhiteBread_after),String.valueOf(this.Ham),String.valueOf(this.Ham_after),String.valueOf(this.Onion),
+                    String.valueOf(Onion_after),String.valueOf(Pickle),String.valueOf(this.Pickle_after),String.valueOf(this.Tuna),String.valueOf(this.Tuna_after),
+                    String.valueOf(this.Spread),String.valueOf(this.Spread_after)};
+            return result;
+        }
+
     }
 
     private class weeklyResult{
