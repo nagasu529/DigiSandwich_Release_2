@@ -82,7 +82,7 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
                 initOrder = customerInfo.get(0).numOfOrder;
-                customerInfo.get(0).numOfOrder = timePeriodShift(0, initOrder,0);
+                customerInfo.get(0).numOfOrder = timePeriodShift(2, initOrder,10);
                 initOrder = customerInfo.get(0).numOfOrder;
                 //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
                 //update current stock on list to suppliers.
@@ -241,9 +241,15 @@ public class customerAgent extends Agent {
         }else if((shiftStatus == 0 || shiftStatus == 1) & (shiftUnit == 0)){
             System.out.println("Stable frequency status");
             unitPerWeek = initialUnit + shiftUnit;
+            if(unitPerWeek >= 160){
+                unitPerWeek = 100;
+            }
         } else {
             System.out.println("Shift down");
             unitPerWeek = initialUnit - shiftUnit;
+            if(unitPerWeek <=40){
+                unitPerWeek = 100;
+            }
         }
         return unitPerWeek;
     }
