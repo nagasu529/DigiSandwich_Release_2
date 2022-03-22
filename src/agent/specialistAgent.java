@@ -39,7 +39,7 @@ public class specialistAgent extends Agent {
 
     ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weeekly report.
     ArrayList<weeklyResult> nextWeekReq = new ArrayList<>();
-    ArrayList<ingredientTransaction> ingredientTransaction = new ArrayList<>();
+    ArrayList<ingredientTransaction> dailyTransaction = new ArrayList<>();
     ArrayList<Double> writtingIngrad = new ArrayList<>();
 
     calcMethod calcMethod = new calcMethod();
@@ -49,12 +49,12 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\dailyResult.csv";
-    //String weeklyResultPath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\weeklyResult.csv";
+    String dailyResult = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\dailyResult.csv";
+    String weeklyResultPath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\weeklyResult.csv";
 
     //OSX classpath.
-    String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
-    String weeklyResultPath = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/weekly.csv";
+    //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
+    //String weeklyResultPath = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/weekly.csv";
 
     String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
@@ -325,7 +325,7 @@ public class specialistAgent extends Agent {
         HashMap<String,Double> dailyUpdate = new HashMap<String,Double>();
         public void action(){
             //memory allocation on arrayList
-            ingredientTransaction.clear();
+            dailyTransaction.clear();
             
             //summary data stock to contain in database.
             int winner = 0;
@@ -376,7 +376,7 @@ public class specialistAgent extends Agent {
             //Initialize the order transaction.
             //ArrayList<calcMethod.orderTransaction> orderTransaction = new ArrayList<>();
             //ArrayList<calcMethod.ingredientTransaction> ingredientTransaction = new ArrayList<>();
-            ingredientTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+            dailyTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
 
             //ingredient transaction (before matching).
             for(int i =0; i < supplierDataList.size();i++){
@@ -389,7 +389,7 @@ public class specialistAgent extends Agent {
                 }
             }
             for(Map.Entry<String,Double> pair : dailyUpdate.entrySet()){
-                stockDailyProduct("before",pair.getKey(),pair.getValue(),ingredientTransaction);
+                stockDailyProduct("before",pair.getKey(),pair.getValue(),dailyTransaction);
             }
             dailyUpdate.clear();
 
@@ -439,9 +439,9 @@ public class specialistAgent extends Agent {
                 weeklyResult.get(0).numOfAccept = weeklyResult.get(0).numOfAccept + productStockAvalable;
                 weeklyResult.get(0).numOfReject = weeklyResult.get(0).numOfReject + (numOfOrder - productStockAvalable);
 
-                ingredientTransaction.get(0).numOfOrder = ingredientTransaction.get(0).numOfOrder + numOfOrder;
-                ingredientTransaction.get(0).numOfAccept = ingredientTransaction.get(0).numOfAccept + productStockAvalable;
-                ingredientTransaction.get(0).numOfReject = ingredientTransaction.get(0).numOfReject + (numOfOrder - productStockAvalable);
+                dailyTransaction.get(0).numOfOrder = dailyTransaction.get(0).numOfOrder + numOfOrder;
+                dailyTransaction.get(0).numOfAccept = dailyTransaction.get(0).numOfAccept + productStockAvalable;
+                dailyTransaction.get(0).numOfReject = dailyTransaction.get(0).numOfReject + (numOfOrder - productStockAvalable);
 
                 //Matching market (value only method).
                 //int productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -508,7 +508,7 @@ public class specialistAgent extends Agent {
                 }
             }
             for(Map.Entry<String,Double> pair : dailyUpdate.entrySet()){
-                stockDailyProduct("after",pair.getKey(),pair.getValue(),ingredientTransaction);
+                stockDailyProduct("after",pair.getKey(),pair.getValue(),dailyTransaction);
             }
             dailyUpdate.clear();
 
@@ -527,10 +527,10 @@ public class specialistAgent extends Agent {
                 }
             }
             // adding totalPaticipant, winner, lost
-            ingredientTransaction.get(0).totalPaticipant = totalPaticipant;
+            dailyTransaction.get(0).totalPaticipant = totalPaticipant;
 
             try {
-                calcMethod.updateCSVFile(dailyResult,ingredientTransaction.get(0).rowData());
+                calcMethod.updateCSVFile(dailyResult,dailyTransaction.get(0).rowData());
             } catch (IOException e) {
                 e.printStackTrace();
             }

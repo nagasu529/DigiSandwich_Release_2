@@ -29,7 +29,8 @@ public class supplierAgent extends Agent {
     ArrayList<supplierInfo> sellingProductList = new ArrayList<>();
 
     int orderTimer = 70000;
-    int timePeriod = 0;
+    double numOfStock = 150000;
+    int dayCount = 0;
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -66,9 +67,9 @@ public class supplierAgent extends Agent {
         addBehaviour(new nextWeekDelivery());
 
         //First week intialise for Raynor's stock
-        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",150000,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",150000,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",150000,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",numOfStock,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",numOfStock,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",numOfStock,1));
 
         //auto update stock which follow the updateProduct method(OneShotBehaviour).
 
@@ -78,9 +79,11 @@ public class supplierAgent extends Agent {
             sellingProductList.get(i).status = 0;
         }
 
-        //Add a TickerBehaviour to refill supply.
+        //Add a TickerBehaviour to refill supply (1 time a week).
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
+                //Day count added.
+                dayCount++;
 
                 //Clearing the weekly stock number.
                 weeklyUpdate.clear();
@@ -125,7 +128,7 @@ public class supplierAgent extends Agent {
             public void action() {
                 //fake adding date to stock.
                 //LocalDate AddedToStock = java.time.LocalDate.of(2021, 9,supplierInfo.getRandIntRange(13,15));
-                LocalDate AddedToStock = java.time.LocalDate.now().plusDays(timePeriod);
+                LocalDate AddedToStock = java.time.LocalDate.now().plusDays(dayCount);
 
                 //Getting data from GUI.
                 calcMethod supplierInfo = new calcMethod();
