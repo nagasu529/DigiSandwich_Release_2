@@ -34,14 +34,15 @@ public class supplierAgent extends Agent {
     int weekCount = 0;
 
     double numOfStock = 100000;
-    String supplyPath = "large-10k-SpikeUp130-14D-supplyResult";
+    String supplyPath = "med-5k-SU10PW-supplyResult";
 
     //int[] orderTimerArray = {40000,70000};
 
     // The GUI by means of which the user can add books in the catalogue
     //public supplierUI myGui;
 
-    String fileClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);
+    //String fileClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //Home PC classpath
+    String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
 
     protected void setup() {
         try {
@@ -252,7 +253,6 @@ public class supplierAgent extends Agent {
         public void action(){
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
-            //System.out.println("Request receiving:  " + msg);
             if(msg != null && msg.getConversationId().equals("Supplier")){
                 System.out.println(" \n Request receiving:  " + msg);
                 String[] arrOfStr = msg.getContent().split("-");

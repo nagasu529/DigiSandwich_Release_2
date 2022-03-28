@@ -29,19 +29,15 @@ public class customerAgent extends Agent {
 
     //Initialize customer information.
     int numOfOrder = 100;
-    int shiftUnit = 0;
-    int shiftStatus = 0;        //(0,0) is stable, (0,x) shift up and others shift down.
+    int shiftUnit = 10;
+    int shiftStatus = 0;        //(shiftStatus,shiftUnit)  =  (0,0) is stable, (0,x) shift up and others shift down.
 
-
-    int spikeStatus = 1;        //0 = default , 1 = spike period.
-    int spikePeriod = 14;        //num of day for spike order.
-    int spikeOrder = 130;       //order on Spike day.
-
-    //calcMethod.customerInfo randInput = customerInfo.randCustomerInput(getLocalName());
     int orderTimer = 10000;
     int timePeriod = 0;
     int weekCount = 1;
     int initialOrder = 0;
+
+    int spikePeriod = 0;        //num of day for spike order.
 
     //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
@@ -93,19 +89,22 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
                 timePeriod = timePeriod + 1;
-                //initialOrder = customerInfo.get(0).numOfOrder;
+                initialOrder = customerInfo.get(0).numOfOrder;
+                /*
                 if(weekCount > 1 && spikePeriod > 0){
                     customerInfo.get(0).numOfOrder = spikePeriod(1,numOfOrder,30);
                     spikePeriod--;
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
+                */
+
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
                 if(timePeriod % 7 == 0){
-                    initialOrder = customerInfo.get(0).numOfOrder;
+                    //initialOrder = customerInfo.get(0).numOfOrder;
                     weekCount = weekCount + 1;
                     System.out.println("weekly " + weekCount);
-                    //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
+                    customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
                     //initOrder = customerInfo.get(0).numOfOrder;
                     //timePeriod = 0;
                 }

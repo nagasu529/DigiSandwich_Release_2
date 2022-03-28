@@ -2,7 +2,7 @@ import jade.Boot;
 
 public class Main {
     public static void main(String[] args){
-        int customerSize = 10;
+        int customerSize = 5;
         StringBuilder customerStartText = new StringBuilder();
         for (int i = 0; i < customerSize; i++){
             String tempText = String.format("customer%d:agent.customerAgent;",i + 1);
