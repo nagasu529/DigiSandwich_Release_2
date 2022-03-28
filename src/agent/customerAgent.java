@@ -27,11 +27,22 @@ public class customerAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
     DecimalFormat df = new DecimalFormat("#.##");
 
+    //Initialize customer information.
+    int numOfOrder = 100;
+    int shiftUnit = 0;
+    int shiftStatus = 0;        //(0,0) is stable, (0,x) shift up and others shift down.
+
+
+    int spikeStatus = 1;        //0 = default , 1 = spike period.
+    int spikePeriod = 14;        //num of day for spike order.
+    int spikeOrder = 130;       //order on Spike day.
+
     //calcMethod.customerInfo randInput = customerInfo.randCustomerInput(getLocalName());
     int orderTimer = 10000;
     int timePeriod = 0;
-    int weekCount = 0;
-    int initOrder = 0;
+    int weekCount = 1;
+    int initialOrder = 0;
+
     //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
     //calcMethod.customerInfo randInput = customerInfo.customerInfo(getLocalName(), " ", " ", 0, 0, 0, "  ", 0);
@@ -39,7 +50,7 @@ public class customerAgent extends Agent {
     protected void setup() {
         //Initialize
         //customerInfo.add(getLocalName(),"HamSandwich","general",100,app.selectProductPrice("HamSandwich","general"),0,0,0);
-        customerInfo.add(new customerInfo(getLocalName(),"HamSandwich","general",100, app.selectProductPrice("HamSandwich","general"),0,0,0));
+        customerInfo.add(new customerInfo(getLocalName(),"HamSandwich","general",numOfOrder, app.selectProductPrice("HamSandwich","general"),0,0,0));
 
     	// Register service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
@@ -81,20 +92,22 @@ public class customerAgent extends Agent {
 
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
-                initOrder = customerInfo.get(0).numOfOrder;
-                customerInfo.get(0).numOfOrder = timePeriodShift(2, initOrder,10);
-                initOrder = customerInfo.get(0).numOfOrder;
-                //orderTimer = orderTimerArray[customerInfo.getRandIntRange(0, orderTimerArray.length - 1)];
-                //update current stock on list to suppliers.
-                //addBehaviour(new responseToCustomers());
-                //int dayCountIncomming = orderTimer/20000;
                 timePeriod = timePeriod + 1;
-                if(timePeriod == 7){
+                //initialOrder = customerInfo.get(0).numOfOrder;
+                if(weekCount > 1 && spikePeriod > 0){
+                    customerInfo.get(0).numOfOrder = spikePeriod(1,numOfOrder,30);
+                    spikePeriod--;
+                }else {
+                    customerInfo.get(0).numOfOrder = numOfOrder;
+                }
+                //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
+                if(timePeriod % 7 == 0){
+                    initialOrder = customerInfo.get(0).numOfOrder;
                     weekCount = weekCount + 1;
-                    System.out.println("weekly" + weekCount);
-                    //customerInfo.get(0).numOfOrder = timePeriodShift(2, initOrder,10);
+                    System.out.println("weekly " + weekCount);
+                    //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
                     //initOrder = customerInfo.get(0).numOfOrder;
-                    timePeriod = 0;
+                    //timePeriod = 0;
                 }
                 addBehaviour(new customerAgent.RequestPerformer());
             }
@@ -251,6 +264,26 @@ public class customerAgent extends Agent {
                 unitPerWeek = 100;
             }
         }
+
         return unitPerWeek;
+    }
+
+    private int spikePeriod(int spikeStatus, int initialOrder, int spikeOrder){
+        int unitResult = 0;
+        switch (spikeStatus){
+            case 1:
+                System.out.println("Spike start (Upper)");
+                unitResult = initialOrder + spikeOrder;
+                break;
+            case 2:
+                System.out.println("Spike start (Lower)");
+                unitResult = initialOrder - spikeOrder;
+            default:
+                System.out.println("None spike");
+                unitResult = initialOrder;
+                break;
+
+        }
+        return unitResult;
     }
 }

@@ -11,6 +11,7 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -22,26 +23,38 @@ public class supplierAgent extends Agent {
 
     DecimalFormat df = new DecimalFormat("#.##");
     DatabaseConn app = new DatabaseConn();
-    calcMethod calcMethod = new calcMethod();
-    HashMap weeklyUpdate = new HashMap();
+    calcMethod calc = new calcMethod();
 
     // The catalogue of supply items (maps the title name to its quantities)
     ArrayList<supplierInfo> sellingProductList = new ArrayList<>();
+    ArrayList<weeklyReport> lastWeekDeliver = new ArrayList<>();
 
-    int orderTimer = 70000;
-    double numOfStock = 150000;
+    int orderTimer = 10000;
     int dayCount = 0;
+    int weekCount = 0;
+
+    double numOfStock = 100000;
+    String supplyPath = "large-10k-SpikeUp130-14D-supplyResult";
 
     //int[] orderTimerArray = {40000,70000};
 
     // The GUI by means of which the user can add books in the catalogue
     //public supplierUI myGui;
 
+    String fileClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);
+
     protected void setup() {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        try {
+            String[] entryWeekly = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
+            calc.createCSV(fileClasspath,entryWeekly);
+        } catch (IOException e) {
             e.printStackTrace();
         }
 
@@ -64,35 +77,105 @@ public class supplierAgent extends Agent {
             }
 
         //prepaired nextWeekIngrad
-        addBehaviour(new nextWeekDelivery());
+        addBehaviour(new nextWeekRequest());
 
         //First week intialise for Raynor's stock
         sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",numOfStock,1));
         sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",numOfStock,1));
         sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",numOfStock,1));
 
-        //auto update stock which follow the updateProduct method(OneShotBehaviour).
-
-        for (int i=0; i < sellingProductList.size();i++){
-            //System.out.println(sellingProductList.get(i).toUpdateService());
-            updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-            sellingProductList.get(i).status = 0;
-        }
-
         //Add a TickerBehaviour to refill supply (1 time a week).
         addBehaviour(new TickerBehaviour(this, orderTimer){
             protected void onTick() {
                 //Day count added.
                 dayCount++;
+                String day = calc.dayInWeek(dayCount);
+                //Checking the weekly list order.
+                if(day == "Monday"){
+                    weekCount++;
+                    if(lastWeekDeliver.size() <= 1){
+                        lastWeekDeliver.add(new weeklyReport(weekCount,0,0,0,0,0,0));
+                        for (int i=0; i < sellingProductList.size();i++){
+                            //System.out.println(sellingProductList.get(i).toUpdateService());
+                            updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                            String productName = sellingProductList.get(i).productName;
+                            switch (productName){
+                                case "WhiteBread":
+                                    lastWeekDeliver.get(0).WhiteBread = sellingProductList.get(i).numOfstock;
+                                    break;
+                                case "Ham":
+                                    lastWeekDeliver.get(0).Ham = sellingProductList.get(i).numOfstock;
+                                    break;
+                                case "Spread":
+                                    lastWeekDeliver.get(0).Spread = sellingProductList.get(i).numOfstock;
+                                    break;
+                            }
+                            sellingProductList.get(i).status = 0;
+                        }
+                    }else{
+                        //getting the data from the week - 1 (size - 2)
+                        int currentIdx = lastWeekDeliver.size() - 2;
+                        for (int i = 0; i < sellingProductList.size();i++){
+                            if(sellingProductList.get(i).status == 1){
+                                String ingradName = sellingProductList.get(i).productName;
+                                switch (ingradName){
+                                    case "WhiteBread":
+                                        updateProduct(getLocalName(),"WhiteBread","general",lastWeekDeliver.get(currentIdx).WhiteBread);
+                                        sellingProductList.get(i).status = 0;
+                                        break;
+                                    case "Ham":
+                                        updateProduct(getLocalName(),"Ham","general",lastWeekDeliver.get(currentIdx).Ham);
+                                        sellingProductList.get(i).status = 0;
+                                        break;
+                                    case "Spread":
+                                        updateProduct(getLocalName(),"Spread","general",lastWeekDeliver.get(currentIdx).Spread);
+                                        sellingProductList.get(i).status = 0;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
 
-                //Clearing the weekly stock number.
-                weeklyUpdate.clear();
+                if(day == "Saturday"){
+                    if(lastWeekDeliver.size() == 1){
+                        try {
+                            calc.updateCSVFile(fileClasspath,lastWeekDeliver.get(0).rowData());
+                        }catch (IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                    //Writing request ingredient to lastweekOrder list.
 
-                //Cheking and update the stock for delivery for next time delivery
-                for (int i=0; i < sellingProductList.size();i++){
-                    if(sellingProductList.get(i).status == 1){
-                        updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-                        sellingProductList.get(i).status = 0;
+                    System.out.println(" num of row:   " + lastWeekDeliver.size());
+                    lastWeekDeliver.add(new weeklyReport(weekCount,0,0,0,0,0,0));
+                    int lastIndex = lastWeekDeliver.size() - 1;
+                    for(int i = 0; i < sellingProductList.size();i++){
+                        if(sellingProductList.get(i).status == 1){
+                            String productName = sellingProductList.get(i).productName;
+                            switch (productName){
+                                case "WhiteBread":
+                                    lastWeekDeliver.get(lastIndex).WhiteBread = sellingProductList.get(i).numOfstock;
+                                    break;
+                                case "Ham":
+                                    lastWeekDeliver.get(lastIndex).Ham = sellingProductList.get(i).numOfstock;
+                                    break;
+                                case "Spread":
+                                    lastWeekDeliver.get(lastIndex).Spread = sellingProductList.get(i).numOfstock;
+                                    break;
+                            }
+                            //sellingProductList.get(i).status = 0;
+                        }
+                    }
+                    System.out.println(" last week delivery:   " + lastWeekDeliver.get(lastIndex).toString());
+                    if(lastWeekDeliver.size() > 1) {
+                        System.out.println("latest week update to csv:   " + lastWeekDeliver.size());
+                        try {
+                            calc.updateCSVFile(fileClasspath, lastWeekDeliver.get(lastWeekDeliver.size() - 1).rowData());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        //addBehaviour(new replyToSpecialist());
                     }
                 }
             }
@@ -159,20 +242,19 @@ public class supplierAgent extends Agent {
                 serviceSender.setConversationId("Supplier");
                 myAgent.send(serviceSender);
 
-                //System.out.println(" \n Service sender from supplier:     " + serviceSender);
+                System.out.println(" \n Service sender from supplier:     " + serviceSender);
 
             }
         } );
     }
 
-    private class nextWeekDelivery extends CyclicBehaviour{
-
+    private class nextWeekRequest extends CyclicBehaviour{
         public void action(){
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
             //System.out.println("Request receiving:  " + msg);
             if(msg != null && msg.getConversationId().equals("Supplier")){
-                //System.out.println(" \n Request receiving:  " + msg);
+                System.out.println(" \n Request receiving:  " + msg);
                 String[] arrOfStr = msg.getContent().split("-");
                 String tempName = arrOfStr[0];
                 double tempNumRequested = Double.parseDouble(arrOfStr[1]);
@@ -182,11 +264,13 @@ public class supplierAgent extends Agent {
                         sellingProductList.get(i).status = 1;
                     }
                 }
+                //Checking next week delivery before sending proposed ACCEPT_PROPOSAL
+
                 //Sending the ACCEPT message to confirm next week order.
                 ACLMessage replyMsg = new ACLMessage(ACLMessage.ACCEPT_PROPOSAL);
                 replyMsg.setConversationId("reply-to-Specialist");
                 replyMsg.addReceiver(msg.getSender());
-                System.out.print("Message from suppliers:  " + replyMsg);
+                //System.out.print("Message from suppliers:  " + replyMsg);
 
             }else {
                 block();
@@ -240,6 +324,7 @@ public class supplierAgent extends Agent {
     }
 
     private class weeklyReport{
+        public int Week;
         public double WhiteBread;
         public double Ham;
         public double Onion;
@@ -247,13 +332,26 @@ public class supplierAgent extends Agent {
         public double Tuna;
         public double Spread;
 
-        public weeklyReport(double WhieBread, double Ham, double Onion, double Pickle, double Tuna, double Spread){
-            this.WhiteBread = WhieBread;
+        public weeklyReport(int Week, double WhiteBread, double Ham, double Onion, double Pickle, double Tuna, double Spread){
+            this.Week = Week;
+            this.WhiteBread = WhiteBread;
             this.Ham = Ham;
             this.Onion = Onion;
             this.Pickle = Pickle;
             this.Tuna = Tuna;
             this.Spread = Spread;
+        }
+        public String toString(){
+            return String.format("WB: %.2f    Ham: %.2f    Spread: %.2f ",this.WhiteBread, this.Ham, this.Spread);
+        }
+        public String[] indexCSV(){
+            String[] resultIndex = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
+            return resultIndex;
+        }
+        public String[] rowData(){
+            String[] result = {String.valueOf(this.Week),String.valueOf(this.WhiteBread),String.valueOf(this.Ham),String.valueOf(this.Onion),
+                    String.valueOf(this.Pickle),String.valueOf(this.Tuna),String.valueOf(this.Spread)};
+            return result;
         }
     }
 }

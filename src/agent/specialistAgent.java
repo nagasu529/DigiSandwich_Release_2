@@ -38,7 +38,7 @@ public class specialistAgent extends Agent {
     ArrayList<ingredientTable> ingredientWritting = new ArrayList<>();
 
     ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weeekly report.
-    ArrayList<weeklyResult> nextWeekReq = new ArrayList<>();
+    //ArrayList<weeklyResult> nextWeekReq = new ArrayList<>();
     ArrayList<ingredientTransaction> dailyTransaction = new ArrayList<>();
     ArrayList<Double> writtingIngrad = new ArrayList<>();
 
@@ -47,10 +47,14 @@ public class specialistAgent extends Agent {
 
     int dayTimeCount = 0;
 
+    //Initialize value befor calculation
+    String dailyName = "large-10k-SpikeUp130-14D-dailyResult";
+    String weeklyName = "large-10k-SpikeUp130-14D-weeklyResult";
+
     //Create CSV classpath.
     //Home PC classpath.
-    String dailyResult = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\dailyResult.csv";
-    String weeklyResultPath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\weeklyResult.csv";
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
     //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
@@ -126,9 +130,62 @@ public class specialistAgent extends Agent {
                 */
 
                 //adding time to finish
-                if(dayTimeCount < 31){
+                if(dayTimeCount < 60){
                     dayTimeCount++;
-                    System.out.println(String.format("Day %d is %s",dayTimeCount, calcMethod.dayInWeek(dayTimeCount)));
+                    addBehaviour(new optimizeOrderFromcurrentStock());
+
+                    String day = calcMethod.dayInWeek(dayTimeCount);
+                    System.out.println(String.format("Day %d is %s",dayTimeCount, day));
+
+                    if(day.equals("Saturday")){
+                        addBehaviour(new nextWeekIngradReq());
+                    }
+
+                    //Weekly writting for Supplier request.
+                    if(day.equals("Sunday")){
+                        //Writing weekly total all incoming.
+                        System.out.println("Staring to update the weekly file");
+                        ArrayList<String> queryResult = app.selectProduct("HamSandwich");
+                        for(int i = 0; i < queryResult.size();i++) {
+                            if (queryResult.get(i) != null) {
+                                double numPerOneProduct = app.selectQuantity("HamSandwich", queryResult.get(i));
+                                switch (queryResult.get(i)){
+                                    case "WhiteBread":
+                                        weeklyResult.get(0).WhiteBreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        break;
+                                    case "Ham":
+                                        weeklyResult.get(0).HamNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        break;
+                                    case "Spread":
+                                        weeklyResult.get(0).SpreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        break;
+                                    case "Onion":
+                                        weeklyResult.get(0).OnionNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        break;
+                                    case "Pickle":
+                                        weeklyResult.get(0).PickleNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        break;
+                                    case "Tuna":
+                                        weeklyResult.get(0).TunaNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        break;
+                                }
+                            }
+                        }
+                        //sending the next week request here.
+                        //ddBehaviour(new nextWeekIngradReq());
+
+                        //writing data in row.
+                        try {
+                            calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(0).rowData());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        //Clear weekly data and creating the new row.
+                        weeklyResult.clear();
+                        weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
+                        //reset countTick
+                        //weekCountTick = 0;
+                    }
                     /*
                     tempdayOfweek++;
                     //weekly counter.
@@ -140,7 +197,7 @@ public class specialistAgent extends Agent {
                     }
                      */
 
-                    addBehaviour(new optimizeOrderFromcurrentStock());
+
                 }else{
                     //Writting the current ingredient stock before environment is terminated.
 
@@ -202,6 +259,58 @@ public class specialistAgent extends Agent {
             for (int i = 0; i < supplierAgent.length; ++i) {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
+
+            //Weekly ingredients need calculation.
+            double breadNeed, hamNeed, spreadNeed;
+            int totalWeekly = weeklyResult.get(0).numOfOrder;
+            ArrayList<String> queryResult = app.selectProduct("HamSandwich");
+            for(int i = 0; i < queryResult.size();i++) {
+                if (queryResult.get(i) != null) {
+                    double numPerOneProduct = app.selectQuantity("HamSandwich", queryResult.get(i));
+                    switch (queryResult.get(i)) {
+                        case "WhiteBread":
+                            breadNeed = (numPerOneProduct * totalWeekly);
+                            if(breadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
+                                breadNeed = breadNeed - dailyTransaction.get(0).WhiteBread_after;
+                                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
+                                serviceSender.setConversationId("Supplier");
+                                myAgent.send(serviceSender);
+                                //System.out.println(serviceSender);
+                            }else {
+                                breadNeed = 0;
+                            }
+                            break;
+                        case "Ham":
+                            hamNeed = (numPerOneProduct * totalWeekly);
+                            if(hamNeed - dailyTransaction.get(0).Ham_after > 0){
+                                hamNeed = hamNeed - dailyTransaction.get(0).Ham_after;
+                                serviceSender.setContent("Ham" + "-" + hamNeed);
+                                serviceSender.setConversationId("Supplier");
+                                myAgent.send(serviceSender);
+                                //System.out.println(serviceSender);
+
+                            }else {
+                                hamNeed = 0;
+                            }
+                            break;
+                        case "Spread":
+                            spreadNeed = (numPerOneProduct * totalWeekly);
+                            if(spreadNeed - dailyTransaction.get(0).Spread_after > 0){
+                                spreadNeed = spreadNeed - dailyTransaction.get(0).Spread_after;
+                                serviceSender.setContent("Spread" + "-" + spreadNeed);
+                                serviceSender.setConversationId("Supplier");
+                                myAgent.send(serviceSender);
+                                //System.out.println(serviceSender);
+                            }else {
+                                spreadNeed = 0;
+                            }
+                            break;
+                    }
+                }
+            }
+
+
+            /*
             //Updating the ingredient stock.
             double breadNeed, hamNeed, spreadNeed;
             if(nextWeekReq.get(0).WhiteBreadNeed > nextWeekReq.get(0).WhiteBread){
@@ -232,6 +341,8 @@ public class specialistAgent extends Agent {
                 spreadNeed = 0;
             }
             nextWeekReq.clear();
+
+             */
         }
     }
 
@@ -534,65 +645,7 @@ public class specialistAgent extends Agent {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            String day = calcMethod.dayInWeek(dayTimeCount);
-            //Weekly writting for Supplier request.
-            if(day.equals("Sunday")){
-                //Writing weekly total all incoming.
-                System.out.println("Staring to update the weekly file");
-                nextWeekReq.add(new weeklyResult("",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
-                ArrayList<String> queryResult = app.selectProduct("HamSandwich");
-                for(int i = 0; i < queryResult.size();i++) {
-                    if (queryResult.get(i) != null) {
-                        double numPerOneProduct = app.selectQuantity("HamSandwich", queryResult.get(i));
-                        switch (queryResult.get(i)){
-                            case "WhiteBread":
-                                weeklyResult.get(0).WhiteBreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
-                                nextWeekReq.get(0).WhiteBread = weeklyResult.get(0).WhiteBread;
-                                nextWeekReq.get(0).WhiteBreadNeed = weeklyResult.get(0).WhiteBreadNeed;
-                                break;
-                            case "Ham":
-                                weeklyResult.get(0).HamNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
-                                nextWeekReq.get(0).Ham = weeklyResult.get(0).Ham;
-                                nextWeekReq.get(0).HamNeed = weeklyResult.get(0).HamNeed;
-                                break;
-                            case "Spread":
-                                weeklyResult.get(0).SpreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
-                                nextWeekReq.get(0).Spread = weeklyResult.get(0).Spread;
-                                nextWeekReq.get(0).SpreadNeed = weeklyResult.get(0).SpreadNeed;
-                                break;
-                            case "Onion":
-                                weeklyResult.get(0).OnionNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
-                                nextWeekReq.get(0).Onion = weeklyResult.get(0).Onion;
-                                nextWeekReq.get(0).OnionNeed = weeklyResult.get(0).OnionNeed;
-                                break;
-                            case "Pickle":
-                                weeklyResult.get(0).PickleNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
-                                nextWeekReq.get(0).Pickle = weeklyResult.get(0).Pickle;
-                                nextWeekReq.get(0).PickleNeed = weeklyResult.get(0).PickleNeed;
-                                break;
-                            case "Tuna":
-                                weeklyResult.get(0).TunaNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
-                                nextWeekReq.get(0).Tuna = weeklyResult.get(0).Tuna;
-                                nextWeekReq.get(0).TunaNeed = weeklyResult.get(0).TunaNeed;
-                                break;
-                        }
-                    }
-                }
-                //sending the next week request here.
-                addBehaviour(new nextWeekIngradReq());
 
-                //writing data in row.
-                try {
-                    calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(0).rowData());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                //Clear weekly data and creating the new row.
-                weeklyResult.clear();
-                weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
-                //reset countTick
-                //weekCountTick = 0;
-            }
             /*
             if(weekCountTick == 1){
                 //calculate weekly stock and update to database.
