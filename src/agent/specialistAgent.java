@@ -48,17 +48,17 @@ public class specialistAgent extends Agent {
     int dayTimeCount = 0;
 
     //Initialize value befor calculation
-    String dailyName = "med-5k-SU10PW-dailyResult";
-    String weeklyName = "med-5k-SU10PW-weeklyResult";
+    String dailyName = "large-10k-Spike15D-dailyResult";
+    String weeklyName = "large-10k-Spike15D-weeklyResult";
 
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\VSCode\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\VSCode\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //NB office classpath.
-    String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
     //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";

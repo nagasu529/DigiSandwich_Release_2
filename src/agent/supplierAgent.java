@@ -12,9 +12,6 @@ import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.ServiceDescription;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
 import java.util.*;
@@ -34,15 +31,15 @@ public class supplierAgent extends Agent {
     int weekCount = 0;
 
     double numOfStock = 100000;
-    String supplyPath = "med-5k-SU10PW-supplyResult";
+    String supplyPath = "large-10k-Spike15D-supplyResult";
 
     //int[] orderTimerArray = {40000,70000};
 
     // The GUI by means of which the user can add books in the catalogue
     //public supplierUI myGui;
 
-    //String fileClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //Home PC classpath
-    String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
+    String fileClasspath = String.format("C:\\Users\\Krist\\VSCode\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //Home PC classpath
+    //String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
 
     protected void setup() {
         try {
