@@ -53,12 +53,16 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+
+    //PC Office classpath.
+    //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //NB office classpath.
-    //String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
     //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
@@ -76,8 +80,8 @@ public class specialistAgent extends Agent {
 
         //Initialize ingredient supply in stock that are coverred for two weeks.
         LocalDate AddedToStock = java.time.LocalDate.now().minusDays(7);
-        supplierDataList.add(calcMethod.new supplierInfo("Initial","WhiteBread","general",200000,AddedToStock));
-        supplierDataList.add(calcMethod.new supplierInfo("Initial","Ham","general",200000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","WhiteBread","general",500000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","Ham","general",500000,AddedToStock));
         supplierDataList.add(calcMethod.new supplierInfo("Initial","Spread","general",200000,AddedToStock));
 
         try {

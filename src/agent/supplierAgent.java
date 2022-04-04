@@ -31,7 +31,7 @@ public class supplierAgent extends Agent {
     int dayCount = 0;
     int weekCount = 1;
 
-    double numOfStock = 100000;
+    double numOfStock = 500000;
 
     String supplierStock = "test-supplierStock";
     String ingredientReq = "test-ingredientReq";
@@ -42,12 +42,15 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Supplier stock classpath
-    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //Home PC classpath
-    //String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
+    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //Home PC classpath
+    String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //NB office classpath
+    //String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //PC office classpath
+
 
     //Request from specialist classpath
-    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);      //Home PC classpath
-    //String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
+    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);      //Home PC classpath
+    String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);   //NB office classpath
+    //String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);               //PC office classpath
 
     protected void setup() {
         try {
@@ -58,15 +61,15 @@ public class supplierAgent extends Agent {
         }
         //create CSV files (ingradStockupdate and ingredReq).
         try {
-            String[] entryWeekly = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
-            calc.createCSV(supplierStockClasspath,entryWeekly);
+            String[] supplierStockIndex = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
+            calc.createCSV(supplierStockClasspath,supplierStockIndex);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         try {
-            String[] entryReq = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
-            calc.createCSV(ingredientReqClasspath,entryReq);
+            String[] ingredientReqIndex = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
+            calc.createCSV(ingredientReqClasspath,ingredientReqIndex);
         }catch (IOException e){
             e.printStackTrace();
         }
