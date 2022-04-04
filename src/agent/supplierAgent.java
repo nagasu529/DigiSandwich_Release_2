@@ -31,7 +31,7 @@ public class supplierAgent extends Agent {
     int dayCount = 0;
     int weekCount = 1;
 
-    double numOfStock = 500000;
+    double numOfStock = 1200000;
 
     String supplierStock = "test-supplierStock";
     String ingredientReq = "test-ingredientReq";
@@ -43,14 +43,14 @@ public class supplierAgent extends Agent {
 
     //Supplier stock classpath
     //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //Home PC classpath
-    String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //NB office classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //PC office classpath
+    //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //NB office classpath
+    String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //PC office classpath
 
 
     //Request from specialist classpath
     //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);      //Home PC classpath
-    String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);   //NB office classpath
-    //String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);               //PC office classpath
+    //String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);   //NB office classpath
+    String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);               //PC office classpath
 
     protected void setup() {
         try {
@@ -107,17 +107,17 @@ public class supplierAgent extends Agent {
             switch (productName){
                 case "WhiteBread":
                     stockOfIngredients.get(0).WhiteBread = sellingProductList.get(i).numOfstock;
-                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
+                    //updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
                     sellingProductList.get(i).numOfstock = 0;
                     break;
                 case "Ham":
                     stockOfIngredients.get(0).Ham = sellingProductList.get(i).numOfstock;
-                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
+                    //updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
                     sellingProductList.get(i).numOfstock = 0;
                     break;
                 case "Spread":
                     stockOfIngredients.get(0).Spread = sellingProductList.get(i).numOfstock;
-                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
+                    //updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
                     sellingProductList.get(i).numOfstock = 0;
                     break;
             }
@@ -148,17 +148,23 @@ public class supplierAgent extends Agent {
                         switch (productName){
                             case "WhiteBread":
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - sellingProductList.get(i).numOfstock;
-                                updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                if(sellingProductList.get(i).numOfstock > 0){
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                }
                                 sellingProductList.get(i).numOfstock = 0;
                                 break;
                             case "Ham":
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - sellingProductList.get(i).numOfstock;
-                                updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                if(sellingProductList.get(i).numOfstock > 0){
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                }
                                 sellingProductList.get(i).numOfstock = 0;
                                 break;
                             case "Spread":
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - sellingProductList.get(i).numOfstock;
-                                updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                if(sellingProductList.get(i).numOfstock > 0){
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                }
                                 sellingProductList.get(i).numOfstock = 0;
                                 break;
                         }

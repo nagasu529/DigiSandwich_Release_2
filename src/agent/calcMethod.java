@@ -803,13 +803,16 @@ public class calcMethod {
             String ingradName = pair.getKey();
             double numPerOneProduct = pair.getValue();
             double numReq = numPerOneProduct * maxReserved;
-            for (int i = 0; i < ingredientCurrentList.size();i++) {
-                if(ingredientCurrentList.get(i).productName.equals(ingradName)){
-                    if((numReq > ingredientCurrentList.get(i).numOfstock)){
-                        numReq = numReq - ingredientCurrentList.get(i).numOfstock;
-                        ingredientCurrentList.get(i).numOfstock = 0;
-                    }else {
-                        ingredientCurrentList.get(i).numOfstock = ingredientCurrentList.get(i).numOfstock - numReq;
+            while (numReq > 0){
+                for(int i = 0; i < ingredientCurrentList.size();i++){
+                    if(ingredientCurrentList.get(i).productName.equals(ingradName)){
+                        if(ingredientCurrentList.get(i).numOfstock - numReq > 0){
+                            ingredientCurrentList.get(i).numOfstock = ingredientCurrentList.get(i).numOfstock - numReq;
+                            numReq = 0;
+                        }else {
+                            numReq = numReq - ingredientCurrentList.get(i).numOfstock;
+                            ingredientCurrentList.get(i).numOfstock = 0;
+                        }
                     }
                 }
             }

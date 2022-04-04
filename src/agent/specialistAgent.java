@@ -38,9 +38,7 @@ public class specialistAgent extends Agent {
     ArrayList<ingredientTable> ingredientWritting = new ArrayList<>();
 
     ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weeekly report.
-    //ArrayList<weeklyResult> nextWeekReq = new ArrayList<>();
     ArrayList<ingredientTransaction> dailyTransaction = new ArrayList<>();
-    ArrayList<Double> writtingIngrad = new ArrayList<>();
 
     calcMethod calcMethod = new calcMethod();
     DatabaseConn app = new DatabaseConn();
@@ -57,12 +55,12 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
-    //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //NB office classpath.
-    String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
     //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
@@ -80,9 +78,9 @@ public class specialistAgent extends Agent {
 
         //Initialize ingredient supply in stock that are coverred for two weeks.
         LocalDate AddedToStock = java.time.LocalDate.now().minusDays(7);
-        supplierDataList.add(calcMethod.new supplierInfo("Initial","WhiteBread","general",500000,AddedToStock));
-        supplierDataList.add(calcMethod.new supplierInfo("Initial","Ham","general",500000,AddedToStock));
-        supplierDataList.add(calcMethod.new supplierInfo("Initial","Spread","general",200000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","WhiteBread","general",1200000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","Ham","general",700000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","Spread","general",100000,AddedToStock));
 
         try {
             calcMethod.createCSV(dailyResult,entry);
@@ -148,23 +146,42 @@ public class specialistAgent extends Agent {
                         addBehaviour(new nextWeekIngradReq());
                     }
 
-                    //Weekly writting for Supplier request.
+                    //Weekly writing for Supplier request.
                     if(day.equals("Sunday")){
                         //Writing weekly total all incoming.
                         System.out.println("Staring to update the weekly file");
+
+                        //latest weekly data in ArraList index.
+                        int latestIndex = weeklyResult.size() - 1;
+
                         ArrayList<String> queryResult = app.selectProduct("HamSandwich");
                         for(int i = 0; i < queryResult.size();i++) {
                             if (queryResult.get(i) != null) {
                                 double numPerOneProduct = app.selectQuantity("HamSandwich", queryResult.get(i));
                                 switch (queryResult.get(i)){
                                     case "WhiteBread":
-                                        weeklyResult.get(0).WhiteBreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        weeklyResult.get(latestIndex).WhiteBreadNeed = numPerOneProduct * weeklyResult.get(latestIndex).numOfOrder;
+                                        for(int j = 0; j < supplierDataList.size();j++){
+                                            if(supplierDataList.get(j).productName.equals("WhiteBread")){
+                                                weeklyResult.get(latestIndex).WhiteBread = weeklyResult.get(latestIndex).WhiteBread + supplierDataList.get(j).numOfstock;
+                                            }
+                                        }
                                         break;
                                     case "Ham":
-                                        weeklyResult.get(0).HamNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        weeklyResult.get(latestIndex).HamNeed = numPerOneProduct * weeklyResult.get(latestIndex).numOfOrder;
+                                        for(int j = 0; j < supplierDataList.size();j++){
+                                            if(supplierDataList.get(j).productName.equals("Ham")){
+                                                weeklyResult.get(latestIndex).Ham = weeklyResult.get(latestIndex).Ham + supplierDataList.get(j).numOfstock;
+                                            }
+                                        }
                                         break;
                                     case "Spread":
-                                        weeklyResult.get(0).SpreadNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
+                                        weeklyResult.get(latestIndex).SpreadNeed = numPerOneProduct * weeklyResult.get(latestIndex).numOfOrder;
+                                        for(int j = 0; j < supplierDataList.size();j++){
+                                            if(supplierDataList.get(j).productName.equals("Spread")){
+                                                weeklyResult.get(latestIndex).Spread = weeklyResult.get(latestIndex).Spread + supplierDataList.get(j).numOfstock;
+                                            }
+                                        }
                                         break;
                                     case "Onion":
                                         weeklyResult.get(0).OnionNeed = numPerOneProduct * weeklyResult.get(0).numOfOrder;
@@ -183,12 +200,12 @@ public class specialistAgent extends Agent {
 
                         //writing data in row.
                         try {
-                            calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(0).rowData());
+                            calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(latestIndex).rowData());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
                         //Clear weekly data and creating the new row.
-                        weeklyResult.clear();
+                        //weeklyResult.clear();
                         weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
                         //reset countTick
                         //weekCountTick = 0;
@@ -269,7 +286,7 @@ public class specialistAgent extends Agent {
 
             //Weekly ingredients need calculation.
             double breadNeed, hamNeed, spreadNeed;
-            int totalWeekly = weeklyResult.get(0).numOfOrder;
+            int totalWeekly = weeklyResult.get(weeklyResult.size() - 1).numOfOrder;
             ArrayList<String> queryResult = app.selectProduct("HamSandwich");
             for(int i = 0; i < queryResult.size();i++) {
                 if (queryResult.get(i) != null) {
@@ -333,31 +350,6 @@ public class specialistAgent extends Agent {
                 double tempNumOf = Double.parseDouble(arrOfStr[2]);
                 String tempAgentName = msg.getSender().getLocalName();
 
-                //Writing supplier data.
-                ingredientWritting.add(new ingredientTable(tempName, tempGrade,tempNumOf,0,0));
-
-                //NumOfIngrad is registered to weeklyArrayList.
-                switch (tempName){
-                    case "WhiteBread":
-                        weeklyResult.get(0).WhiteBread = weeklyResult.get(0).WhiteBread + tempNumOf;
-                        break;
-                    case "Ham":
-                        weeklyResult.get(0).Ham = weeklyResult.get(0).Ham + tempNumOf;
-                        break;
-                    case "Spread":
-                        weeklyResult.get(0).Spread = weeklyResult.get(0).Spread + tempNumOf;
-                        break;
-                    case "Onion":
-                        weeklyResult.get(0).Onion = weeklyResult.get(0).Onion + tempNumOf;
-                        break;
-                    case "Pickle":
-                        weeklyResult.get(0).Pickle = weeklyResult.get(0).Pickle + tempNumOf;
-                        break;
-                    case "Tuna":
-                        weeklyResult.get(0).Tuna = weeklyResult.get(0).Tuna + tempNumOf;
-                        break;
-                }
-
                 //getting and extract the LocalDate
                 LocalDate addedStockDate = LocalDate.parse(String.format("%s-%s-%s",arrOfStr[3],arrOfStr[4],arrOfStr[5]));
 
@@ -410,13 +402,14 @@ public class specialistAgent extends Agent {
         public void action(){
             //memory allocation on arrayList
             dailyTransaction.clear();
+
+            //latest weekly result index to wrire data.
+            int latestIndex = weeklyResult.size() - 1;
             
             //summary data stock to contain in database.
-            int winner = 0;
-            int lost = 0;
-            int totalOrderReq = 0;
-            int totalOrderReject = 0;
-            int totalPaticipant = 0;
+            //int totalOrderReq = 0;
+            //int totalOrderReject = 0;
+            //int totalPaticipant = 0;
             double valueEarning = 0.0;
             int listSize = customerDataList.size();
 
@@ -443,23 +436,6 @@ public class specialistAgent extends Agent {
                 }
             }
 
-            //list of order for this round.
-            /**
-            if(customerDataList.size() > 0){
-                System.out.println("");
-                for (agent.calcMethod.customerInfo a : customerDataList) {
-                    System.out.println("Before bidding process:   " + a.toStringOutput());
-                    
-                }
-                System.out.println("");
-            }else{
-                System.out.println("Do not have order request today");
-            }
-             */ 
-            
-            //Initialize the order transaction.
-            //ArrayList<calcMethod.orderTransaction> orderTransaction = new ArrayList<>();
-            //ArrayList<calcMethod.ingredientTransaction> ingredientTransaction = new ArrayList<>();
             dailyTransaction.add(new ingredientTransaction(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
 
             //ingredient transaction (before matching).
@@ -486,7 +462,7 @@ public class specialistAgent extends Agent {
                 String productName = customerDataList.get(numLoop).orderName;
                 String productGrade = customerDataList.get(numLoop).ingredientGrade;
                 int numOfOrder = customerDataList.get(numLoop).numOfOrder;
-                weeklyResult.get(0).numOfOrder = weeklyResult.get(0).numOfOrder + numOfOrder;
+                weeklyResult.get(latestIndex).numOfOrder = weeklyResult.get(latestIndex).numOfOrder + numOfOrder;
 
                 //int numMatchingMethod = calcMethod.getRandIntRange(1,2);                      //ordering the optimization method.                                                                              
                 int numMatchingMethod = 4;
@@ -520,12 +496,12 @@ public class specialistAgent extends Agent {
                     System.out.println("       " + supplierDataList.get(i).toStringOutput());
                 }
 
-                weeklyResult.get(0).numOfAccept = weeklyResult.get(0).numOfAccept + productStockAvalable;
-                weeklyResult.get(0).numOfReject = weeklyResult.get(0).numOfReject + (numOfOrder - productStockAvalable);
+                weeklyResult.get(latestIndex).numOfAccept = weeklyResult.get(latestIndex).numOfAccept + productStockAvalable;
+                weeklyResult.get(latestIndex).numOfReject = weeklyResult.get(latestIndex).numOfReject + (numOfOrder - productStockAvalable);
 
-                dailyTransaction.get(0).numOfOrder = dailyTransaction.get(0).numOfOrder + numOfOrder;
-                dailyTransaction.get(0).numOfAccept = dailyTransaction.get(0).numOfAccept + productStockAvalable;
-                dailyTransaction.get(0).numOfReject = dailyTransaction.get(0).numOfReject + (numOfOrder - productStockAvalable);
+                dailyTransaction.get(dailyTransaction.size() - 1).numOfOrder = dailyTransaction.get(dailyTransaction.size() - 1).numOfOrder + numOfOrder;
+                dailyTransaction.get(dailyTransaction.size() - 1).numOfAccept = dailyTransaction.get(dailyTransaction.size() - 1).numOfAccept + productStockAvalable;
+                dailyTransaction.get(dailyTransaction.size() - 1).numOfReject = dailyTransaction.get(dailyTransaction.size() - 1).numOfReject + (numOfOrder - productStockAvalable);
 
                 //Matching market (value only method).
                 //int productStockAvalable = calcMethod.matchingOrder(supplierDataList, productName, productGrade, numOfOrder);
@@ -538,9 +514,9 @@ public class specialistAgent extends Agent {
 
                 //myGui.displayUI(String.format(" The number of available order from stock is:  %s\n", productStockAvalable));
                 customerDataList.get(numLoop).numReply = productStockAvalable;
-                valueEarning = valueEarning + (customerDataList.get(numLoop).numReply * customerDataList.get(numLoop).pricePerUnit);            //Total earned value for each customer.
-                totalOrderReq = totalOrderReq + numOfOrder;
-                totalOrderReject = totalOrderReject + (numOfOrder - customerDataList.get(numLoop).numReply);
+                //valueEarning = valueEarning + (customerDataList.get(numLoop).numReply * customerDataList.get(numLoop).pricePerUnit);            //Total earned value for each customer.
+                //totalOrderReq = totalOrderReq + numOfOrder;
+                //totalOrderReject = totalOrderReject + (numOfOrder - customerDataList.get(numLoop).numReply);
 
                 //reply order to customer (ACCEPT_PROPOSAL to winner and REJECT_PROPOSAL to others).
                 if(productStockAvalable > 0){
@@ -556,7 +532,6 @@ public class specialistAgent extends Agent {
                     myAgent.send(acceptMsg);
                     //myGui.displayUI(acceptMsg.toString());
                     //System.out.println(acceptMsg);
-                    winner++;                                       //Number of winner to buy counting.
                 }else {
                     //proposed some product to them.
                     ACLMessage rejectMsg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
@@ -570,12 +545,11 @@ public class specialistAgent extends Agent {
                     myAgent.send(rejectMsg);
                     //System.out.println(rejectMsg);
                     //myGui.displayUI(rejectMsg.toString());
-                    lost++;                                         //Number of participants who do not receive orders.
                 }
             }
             
             //updating customer data list.
-            totalPaticipant = customerDataList.size();              //total participant count.
+            //totalPaticipant = customerDataList.size();              //total participant count.
             while(listSize > 0){
                 customerDataList.remove(0);
                 listSize--;
@@ -596,23 +570,8 @@ public class specialistAgent extends Agent {
             }
             dailyUpdate.clear();
 
-            /*
-            for(int i = 0; i < supplierDataList.size();i++){
-                for(int j = 0; j < ingredientWritting.size();j++){
-                    if(supplierDataList.get(i).productName.equals(ingredientWritting.get(j).ingredientName) &&
-                            supplierDataList.get(i).ingredientGrade.equals(ingredientWritting.get(j).ingredientGrade)){
-                        ingredientWritting.get(j).numOfAfter = supplierDataList.get(i).numOfstock;
-                        ingredientWritting.get(j).percentage = (ingredientWritting.get(j).numOfAfter * 100)/ingredientWritting.get(i).numOfBefore;
-                        writtingIngrad.add(ingredientWritting.get(j).percentage);
-                        //allWritingResult.add(ingredientWritting.get(j).numOfBefore);
-                        //allWritingResult.add(ingredientWritting.get(j).numOfAfter);
-                    }
-                }
-            }
-            */
-
             // adding totalPaticipant, winner, lost
-            dailyTransaction.get(0).totalPaticipant = totalPaticipant;
+            //dailyTransaction.get(0).totalPaticipant = totalPaticipant;
 
             try {
                 calcMethod.updateCSVFile(dailyResult,dailyTransaction.get(0).rowData());
@@ -620,41 +579,9 @@ public class specialistAgent extends Agent {
                 e.printStackTrace();
             }
 
-            /*
-            if(weekCountTick == 1){
-                //calculate weekly stock and update to database.
-                for(int i =0; i < supplierDataList.size();i++){
-                    if(weeklyUpdate.get(supplierDataList.get(i).productName) == null){
-                        weeklyUpdate.put(supplierDataList.get(i).productName,supplierDataList.get(i).numOfstock);
-                    }else {
-                        double tempInMap = weeklyUpdate.get(supplierDataList.get(i).productName);
-                        double newStock = tempInMap + supplierDataList.get(i).numOfstock;
-                        weeklyUpdate.replace(supplierDataList.get(i).productName,tempInMap,newStock);
-                    }
-                }
-                //Writting to database
-                //app.insertWeeklyStock(weeklyUpdate.get("WhiteBread"), weeklyUpdate.get("Ham"),weeklyUpdate.get("Onion"),weeklyUpdate.get("Pickle"),weeklyUpdate.get("Tuna"),weeklyUpdate.get("Spread"));
-                weeklyUpdate.clear();
-                //reset weeklyCountTick to 0.
-                weekCountTick = 0;
-            }*/
-
-
-            /*
-            app.insertResult("MatchingResult", matchingMethod, totalPaticipant,winner,lost,totalOrderReq, totalOrderReject, valueEarning);
-            app.insertSupplier(writtingIngrad.get(0),writtingIngrad.get(1),writtingIngrad.get(2),writtingIngrad.get(3),writtingIngrad.get(4),writtingIngrad.get(5));
-            app.insertAllResult(ingredientTransaction.get(0).WhiteBread,ingredientTransaction.get(0).WhiteBread_after,ingredientTransaction.get(0).Ham,ingredientTransaction.get(0).Ham_after,
-                    ingredientTransaction.get(0).Onion,ingredientTransaction.get(0).Onion_after,ingredientTransaction.get(0).Pickle,ingredientTransaction.get(0).Pickle_after,
-                    ingredientTransaction.get(0).Tuna,ingredientTransaction.get(0).Tuna_after,ingredientTransaction.get(0).Spread,ingredientTransaction.get(0).Spread_after);
-            app.orderTransaction("OrderTransaction", orderTransaction.get(0).HamSandwich_order, orderTransaction.get(0).HamSandwich_accept,orderTransaction.get(0).HamSandwich_reject);
-            */
-
-
-            //writtingIngrad.clear();
-            //orderTransaction.clear();
-            //ingredientTransaction.clear();
         }
     }
+
     private class ingredientTransaction{
         public int totalPaticipant, numOfOrder,numOfAccept, numOfReject;
         public double WhiteBread, WhiteBread_after, Ham, Ham_after, Onion, Onion_after,Pickle, Pickle_after, Tuna, Tuna_after, Spread, Spread_after;
