@@ -24,21 +24,29 @@ public class supplierAgent extends Agent {
 
     // The catalogue of supply items (maps the title name to its quantities)
     ArrayList<supplierInfo> sellingProductList = new ArrayList<>();
-    ArrayList<weeklyReport> lastWeekDeliver = new ArrayList<>();
+    ArrayList<weeklyReport> stockOfIngredients = new ArrayList<>();
+    ArrayList<weeklyReport> requestFromSpecialist = new ArrayList<>();
 
     int orderTimer = 10000;
     int dayCount = 0;
-    int weekCount = 0;
+    int weekCount = 1;
 
     double numOfStock = 100000;
-    String supplyPath = "large-10k-Spike15D-supplyResult";
+
+    String supplierStock = "test-supplierStock";
+    String ingredientReq = "test-ingredientReq";
 
     //int[] orderTimerArray = {40000,70000};
 
     // The GUI by means of which the user can add books in the catalogue
     //public supplierUI myGui;
 
-    String fileClasspath = String.format("C:\\Users\\Krist\\VSCode\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //Home PC classpath
+    //Supplier stock classpath
+    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //Home PC classpath
+    //String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
+
+    //Request from specialist classpath
+    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);      //Home PC classpath
     //String fileClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplyPath);      //NB office classpath
 
     protected void setup() {
@@ -48,11 +56,18 @@ public class supplierAgent extends Agent {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-
+        //create CSV files (ingradStockupdate and ingredReq).
         try {
             String[] entryWeekly = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
-            calc.createCSV(fileClasspath,entryWeekly);
+            calc.createCSV(supplierStockClasspath,entryWeekly);
         } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            String[] entryReq = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
+            calc.createCSV(ingredientReqClasspath,entryReq);
+        }catch (IOException e){
             e.printStackTrace();
         }
 
@@ -75,12 +90,43 @@ public class supplierAgent extends Agent {
             }
 
         //prepaired nextWeekIngrad
-        addBehaviour(new nextWeekRequest());
+        addBehaviour(new receivingSupplyRequest());
 
         //First week intialise for Raynor's stock
-        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",numOfStock,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",numOfStock,1));
-        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",numOfStock,1));
+        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",numOfStock));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",numOfStock));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",numOfStock));
+
+        //Adding current update ingredient to lastWeekDeliverStock (First week).
+        stockOfIngredients.add(new weeklyReport(weekCount,0,0,0,0,0,0));
+        for(int i = 0; i < sellingProductList.size();i++){
+            String productName = sellingProductList.get(i).productName;
+            switch (productName){
+                case "WhiteBread":
+                    stockOfIngredients.get(0).WhiteBread = sellingProductList.get(i).numOfstock;
+                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
+                    sellingProductList.get(i).numOfstock = 0;
+                    break;
+                case "Ham":
+                    stockOfIngredients.get(0).Ham = sellingProductList.get(i).numOfstock;
+                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
+                    sellingProductList.get(i).numOfstock = 0;
+                    break;
+                case "Spread":
+                    stockOfIngredients.get(0).Spread = sellingProductList.get(i).numOfstock;
+                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade,sellingProductList.get(i).numOfstock);
+                    sellingProductList.get(i).numOfstock = 0;
+                    break;
+            }
+
+        }
+        //Writing to initialize stock at first week
+        try {
+            calc.updateCSVFile(supplierStockClasspath,stockOfIngredients.get(0).rowData());
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
 
         //Add a TickerBehaviour to refill supply (1 time a week).
         addBehaviour(new TickerBehaviour(this, orderTimer){
@@ -89,91 +135,61 @@ public class supplierAgent extends Agent {
                 dayCount++;
                 String day = calc.dayInWeek(dayCount);
                 //Checking the weekly list order.
-                if(day == "Monday"){
+                if(day == "Monday" && dayCount > 6){
                     weekCount++;
-                    if(lastWeekDeliver.size() <= 1){
-                        lastWeekDeliver.add(new weeklyReport(weekCount,0,0,0,0,0,0));
-                        for (int i=0; i < sellingProductList.size();i++){
-                            //System.out.println(sellingProductList.get(i).toUpdateService());
-                            updateProduct(getLocalName(),sellingProductList.get(i).productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-                            String productName = sellingProductList.get(i).productName;
-                            switch (productName){
-                                case "WhiteBread":
-                                    lastWeekDeliver.get(0).WhiteBread = sellingProductList.get(i).numOfstock;
-                                    break;
-                                case "Ham":
-                                    lastWeekDeliver.get(0).Ham = sellingProductList.get(i).numOfstock;
-                                    break;
-                                case "Spread":
-                                    lastWeekDeliver.get(0).Spread = sellingProductList.get(i).numOfstock;
-                                    break;
-                            }
-                            sellingProductList.get(i).status = 0;
+                    //Initialize for current week stock writing.
+                    stockOfIngredients.add(new weeklyReport(weekCount,0,0,0,0,0,0));
+                    for (int i=0; i < sellingProductList.size();i++){
+                        //Checking ingredient delivery request.
+                        String productName = sellingProductList.get(i).productName;
+                        switch (productName){
+                            case "WhiteBread":
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - sellingProductList.get(i).numOfstock;
+                                updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                sellingProductList.get(i).numOfstock = 0;
+                                break;
+                            case "Ham":
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - sellingProductList.get(i).numOfstock;
+                                updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                sellingProductList.get(i).numOfstock = 0;
+                                break;
+                            case "Spread":
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - sellingProductList.get(i).numOfstock;
+                                updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
+                                sellingProductList.get(i).numOfstock = 0;
+                                break;
                         }
-                    }else{
-                        //getting the data from the week - 1 (size - 2)
-                        int currentIdx = lastWeekDeliver.size() - 2;
-                        for (int i = 0; i < sellingProductList.size();i++){
-                            if(sellingProductList.get(i).status == 1){
-                                String ingradName = sellingProductList.get(i).productName;
-                                switch (ingradName){
-                                    case "WhiteBread":
-                                        updateProduct(getLocalName(),"WhiteBread","general",lastWeekDeliver.get(currentIdx).WhiteBread);
-                                        sellingProductList.get(i).status = 0;
-                                        break;
-                                    case "Ham":
-                                        updateProduct(getLocalName(),"Ham","general",lastWeekDeliver.get(currentIdx).Ham);
-                                        sellingProductList.get(i).status = 0;
-                                        break;
-                                    case "Spread":
-                                        updateProduct(getLocalName(),"Spread","general",lastWeekDeliver.get(currentIdx).Spread);
-                                        sellingProductList.get(i).status = 0;
-                                        break;
-                                }
-                            }
-                        }
+                    }
+                    //Writing to stockUpdate for each week to CSV
+                    try {
+                        calc.updateCSVFile(supplierStockClasspath,stockOfIngredients.get(stockOfIngredients.size() - 1).rowData());
+                    }catch (IOException e){
+                        e.printStackTrace();
                     }
                 }
 
                 if(day == "Saturday"){
-                    if(lastWeekDeliver.size() == 1){
-                        try {
-                            calc.updateCSVFile(fileClasspath,lastWeekDeliver.get(0).rowData());
-                        }catch (IOException e){
-                            e.printStackTrace();
-                        }
-                    }
-                    //Writing request ingredient to lastweekOrder list.
-
-                    System.out.println(" num of row:   " + lastWeekDeliver.size());
-                    lastWeekDeliver.add(new weeklyReport(weekCount,0,0,0,0,0,0));
-                    int lastIndex = lastWeekDeliver.size() - 1;
+                    System.out.println(" num of row:   " + requestFromSpecialist.size());
+                    requestFromSpecialist.add(new weeklyReport(weekCount,0,0,0,0,0,0));
+                    int lastIndex = requestFromSpecialist.size() - 1;
                     for(int i = 0; i < sellingProductList.size();i++){
-                        if(sellingProductList.get(i).status == 1){
-                            String productName = sellingProductList.get(i).productName;
-                            switch (productName){
-                                case "WhiteBread":
-                                    lastWeekDeliver.get(lastIndex).WhiteBread = sellingProductList.get(i).numOfstock;
-                                    break;
-                                case "Ham":
-                                    lastWeekDeliver.get(lastIndex).Ham = sellingProductList.get(i).numOfstock;
-                                    break;
-                                case "Spread":
-                                    lastWeekDeliver.get(lastIndex).Spread = sellingProductList.get(i).numOfstock;
-                                    break;
-                            }
-                            //sellingProductList.get(i).status = 0;
+                        String productName = sellingProductList.get(i).productName;
+                        switch (productName){
+                            case "WhiteBread":
+                                requestFromSpecialist.get(lastIndex).WhiteBread = sellingProductList.get(i).numOfstock;
+                                break;
+                            case "Ham":
+                                requestFromSpecialist.get(lastIndex).Ham = sellingProductList.get(i).numOfstock;
+                                break;
+                            case "Spread":
+                                requestFromSpecialist.get(lastIndex).Spread = sellingProductList.get(i).numOfstock;
+                                break;
                         }
                     }
-                    System.out.println(" last week delivery:   " + lastWeekDeliver.get(lastIndex).toString());
-                    if(lastWeekDeliver.size() > 1) {
-                        System.out.println("latest week update to csv:   " + lastWeekDeliver.size());
-                        try {
-                            calc.updateCSVFile(fileClasspath, lastWeekDeliver.get(lastWeekDeliver.size() - 1).rowData());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                        //addBehaviour(new replyToSpecialist());
+                    try {
+                        calc.updateCSVFile(ingredientReqClasspath, requestFromSpecialist.get(requestFromSpecialist.size() - 1).rowData());
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
                 }
             }
@@ -246,7 +262,7 @@ public class supplierAgent extends Agent {
         } );
     }
 
-    private class nextWeekRequest extends CyclicBehaviour{
+    private class receivingSupplyRequest extends CyclicBehaviour{
         public void action(){
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
             ACLMessage msg = myAgent.receive(mt);
@@ -258,7 +274,7 @@ public class supplierAgent extends Agent {
                 for(int i = 0; i < sellingProductList.size();i++){
                     if(tempName.equals(sellingProductList.get(i).productName)){
                         sellingProductList.get(i).numOfstock = tempNumRequested;
-                        sellingProductList.get(i).status = 1;
+                        //sellingProductList.get(i).status = 1;
                     }
                 }
                 //Checking next week delivery before sending proposed ACCEPT_PROPOSAL
@@ -305,18 +321,16 @@ public class supplierAgent extends Agent {
         public String productName;
         public String ingredientGrade;
         public double numOfstock;
-        public int status;
 
-        public supplierInfo(String agentName, String productName, String ingredientGrade, double numOfstock, int status) {
+        public supplierInfo(String agentName, String productName, String ingredientGrade, double numOfstock) {
             this.agentName = agentName;
             this.productName = productName;
             this.ingredientGrade = ingredientGrade;
             this.numOfstock = numOfstock;
-            this.status = status;
         }
 
         public String toStringOutput() {
-            return "Agent name: "+ this.agentName + " Ingredient name: " + this.productName + "   Quality: " + this.ingredientGrade + "   Stock: " + df.format(numOfstock) + " Re-stock status: " + this.status;
+            return "Agent name: "+ this.agentName + " Ingredient name: " + this.productName + "   Quality: " + this.ingredientGrade + "   Stock: " + df.format(numOfstock);
         }
     }
 

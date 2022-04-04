@@ -48,13 +48,13 @@ public class specialistAgent extends Agent {
     int dayTimeCount = 0;
 
     //Initialize value befor calculation
-    String dailyName = "large-10k-Spike15D-dailyResult";
-    String weeklyName = "large-10k-Spike15D-weeklyResult";
+    String dailyName = "test-dailyResult";
+    String weeklyName = "test-weeklyResult";
 
     //Create CSV classpath.
     //Home PC classpath.
-    String dailyResult = String.format("C:\\Users\\Krist\\VSCode\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\Krist\\VSCode\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //NB office classpath.
     //String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
@@ -74,18 +74,17 @@ public class specialistAgent extends Agent {
         //myGui = new biddingSpecialistUI(this);
         //myGui.show();
 
+        //Initialize ingredient supply in stock that are coverred for two weeks.
+        LocalDate AddedToStock = java.time.LocalDate.now().minusDays(7);
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","WhiteBread","general",200000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","Ham","general",200000,AddedToStock));
+        supplierDataList.add(calcMethod.new supplierInfo("Initial","Spread","general",200000,AddedToStock));
+
         try {
             calcMethod.createCSV(dailyResult,entry);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        /*
-        try {
-            calcMethod.createCSV(weeklyResultPath,entryWeekly);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
-
         weeklyResult.add(new weeklyResult("HamSandwich",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0));
         //Prepairing the CSV with header (Weekly report)
         try {
@@ -134,7 +133,7 @@ public class specialistAgent extends Agent {
                 */
 
                 //adding time to finish
-                if(dayTimeCount < 60){
+                if(dayTimeCount < 23){
                     dayTimeCount++;
                     addBehaviour(new optimizeOrderFromcurrentStock());
 
@@ -313,40 +312,6 @@ public class specialistAgent extends Agent {
                 }
             }
 
-
-            /*
-            //Updating the ingredient stock.
-            double breadNeed, hamNeed, spreadNeed;
-            if(nextWeekReq.get(0).WhiteBreadNeed > nextWeekReq.get(0).WhiteBread){
-                breadNeed = nextWeekReq.get(0).WhiteBreadNeed;
-                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
-                System.out.println(serviceSender);
-            }else {
-                breadNeed = 0;
-            }
-            if(nextWeekReq.get(0).HamNeed > nextWeekReq.get(0).Ham){
-                hamNeed = nextWeekReq.get(0).HamNeed;
-                serviceSender.setContent("Ham" + "-" + hamNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
-                System.out.println(serviceSender);
-            }else {
-                hamNeed = 0;
-            }
-            if(nextWeekReq.get(0).SpreadNeed > nextWeekReq.get(0).Spread){
-                spreadNeed = nextWeekReq.get(0).SpreadNeed;
-                serviceSender.setContent("Spread" + "-" + spreadNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
-                System.out.println(serviceSender);
-            }else {
-                spreadNeed = 0;
-            }
-            nextWeekReq.clear();
-
-             */
         }
     }
 
@@ -627,8 +592,7 @@ public class specialistAgent extends Agent {
             }
             dailyUpdate.clear();
 
-            //ArrayList<Double> allWritingResult = new ArrayList<>();
-            //ArrayList<Double> writtingIngrad = new ArrayList<>();
+            /*
             for(int i = 0; i < supplierDataList.size();i++){
                 for(int j = 0; j < ingredientWritting.size();j++){
                     if(supplierDataList.get(i).productName.equals(ingredientWritting.get(j).ingredientName) &&
@@ -641,6 +605,8 @@ public class specialistAgent extends Agent {
                     }
                 }
             }
+            */
+
             // adding totalPaticipant, winner, lost
             dailyTransaction.get(0).totalPaticipant = totalPaticipant;
 
