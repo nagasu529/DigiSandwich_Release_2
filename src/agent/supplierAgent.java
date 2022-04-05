@@ -31,26 +31,36 @@ public class supplierAgent extends Agent {
     int dayCount = 0;
     int weekCount = 1;
 
-    double numOfStock = 1200000;
+    double numOfStock = 300000;
 
     String supplierStock = "test-supplierStock";
     String ingredientReq = "test-ingredientReq";
+    String refillStock = "test-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
     // The GUI by means of which the user can add books in the catalogue
     //public supplierUI myGui;
 
-    //Supplier stock classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //Home PC classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //NB office classpath
-    String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);      //PC office classpath
+    //Home PC classpath
+    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+
+    //NB Office classpath
+    String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+
+    //PC Office classpath
+    //String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+
 
 
     //Request from specialist classpath
-    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);      //Home PC classpath
-    //String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);   //NB office classpath
-    String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);               //PC office classpath
+
+
+
 
     protected void setup() {
         try {
@@ -100,7 +110,7 @@ public class supplierAgent extends Agent {
         sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",numOfStock));
         sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",numOfStock));
 
-        //Adding current update ingredient to lastWeekDeliverStock (First week).
+        //Adding current update ingredient to lastWeekDeliverStock (First week). Then, clearing the status on sellingPorduct list to zero and waiting for incoming ingredients requirement.
         stockOfIngredients.add(new weeklyReport(weekCount,0,0,0,0,0,0));
         for(int i = 0; i < sellingProductList.size();i++){
             String productName = sellingProductList.get(i).productName;
@@ -175,6 +185,10 @@ public class supplierAgent extends Agent {
                     }catch (IOException e){
                         e.printStackTrace();
                     }
+                }
+
+                if(day == "Tuesday" && dayCount > 8){
+                    //addBehaviour(new refilledStock());
                 }
 
                 if(day == "Saturday"){
@@ -297,6 +311,21 @@ public class supplierAgent extends Agent {
             }else {
                 block();
             }
+        }
+    }
+    //Agent state for order refill stock if needed.
+    private class refilledStock extends OneShotBehaviour {
+        public void action(){
+            //History data checking.
+            int numOfweeks = stockOfIngredients.size();
+            //The first three week if we do not have enough data, going to stock with maximum capacity as a first priority.
+            if(numOfweeks < 2){
+
+            }else{
+
+            }
+
+            //getting data with SMA for three week.
         }
     }
 

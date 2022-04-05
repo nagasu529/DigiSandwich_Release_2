@@ -55,12 +55,12 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
-    String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //NB office classpath.
-    //String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
     //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
@@ -135,7 +135,7 @@ public class specialistAgent extends Agent {
                 */
 
                 //adding time to finish
-                if(dayTimeCount < 23){
+                if(dayTimeCount < 65){
                     dayTimeCount++;
                     addBehaviour(new optimizeOrderFromcurrentStock());
 
@@ -294,6 +294,7 @@ public class specialistAgent extends Agent {
                     switch (queryResult.get(i)) {
                         case "WhiteBread":
                             breadNeed = (numPerOneProduct * totalWeekly);
+                            //weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
                             if(breadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
                                 breadNeed = breadNeed - dailyTransaction.get(0).WhiteBread_after;
                                 serviceSender.setContent("WhiteBread" + "-" + breadNeed);
@@ -332,7 +333,6 @@ public class specialistAgent extends Agent {
                     }
                 }
             }
-
         }
     }
 
