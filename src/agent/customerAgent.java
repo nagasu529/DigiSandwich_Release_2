@@ -32,7 +32,7 @@ public class customerAgent extends Agent {
     int shiftUnit = 0;
     int shiftStatus = 0;        //(shiftStatus,shiftUnit)  =  (0,0) is stable, (0,x) shift up and others shift down.
 
-    int orderTimer = 10000;
+    int dayTimer = 10000;
     int timePeriod = 0;
     int weekCount = 1;
     int initialOrder = 0;
@@ -86,7 +86,7 @@ public class customerAgent extends Agent {
 
         //addBehaviour(new customerAgent.ReceivedOrderRequest());
 
-        addBehaviour(new TickerBehaviour(this, orderTimer){
+        addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
                 //initialOrder = customerInfo.get(0).numOfOrder;

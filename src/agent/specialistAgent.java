@@ -1,6 +1,5 @@
 package agent;
 
-import com.opencsv.CSVWriter;
 import database.DatabaseConn;
 import jade.content.lang.Codec;
 import jade.content.lang.sl.SLCodec;
@@ -20,10 +19,7 @@ import jade.domain.JADEAgentManagement.ShutdownPlatform;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -35,7 +31,6 @@ public class specialistAgent extends Agent {
 
     ArrayList<calcMethod.supplierInfo> supplierDataList = new ArrayList<>();   //List of available ingredient
     ArrayList<calcMethod.customerInfo> customerDataList = new ArrayList<>();   //List of request orders.
-    ArrayList<ingredientTable> ingredientWritting = new ArrayList<>();
 
     ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weeekly report.
     ArrayList<ingredientTransaction> dailyTransaction = new ArrayList<>();
@@ -43,24 +38,25 @@ public class specialistAgent extends Agent {
     calcMethod calcMethod = new calcMethod();
     DatabaseConn app = new DatabaseConn();
 
+    int dayTimer = 10000;
     int dayTimeCount = 0;
 
     //Initialize value befor calculation
-    String dailyName = "test-dailyResult";
-    String weeklyName = "test-weeklyResult";
+    String dailyName = "over20Pct-test-dailyResult";
+    String weeklyName = "over20Pct-test-weeklyResult";
 
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
     //String weeklyResultPath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //NB office classpath.
-    String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //String dailyResult = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
     //String dailyResult = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/dailyResult.csv";
@@ -116,7 +112,7 @@ public class specialistAgent extends Agent {
         //The service reply process which is after the end of auction. Agent 
 
         //Add a TickerBehaviour that shows the list of ingredients stock and order queue.
-        addBehaviour(new TickerBehaviour(this, 10000){
+        addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 //update current stock on the list of suppliers.
                 for(int i = 0; i < supplierDataList.size(); i++) {
@@ -263,6 +259,9 @@ public class specialistAgent extends Agent {
     private class nextWeekIngradReq extends OneShotBehaviour{
         private AID[] supplierAgent;
         public void action(){
+            int overEstPct = 20;
+
+
             //Searching specialist agent and created address table.
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sdSearch = new ServiceDescription();
@@ -284,8 +283,37 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
+            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult,dailyTransaction);
+            double breadNeed = smaOptimaization(2,0,"WhiteBread",weeklyResult,dailyTransaction);
+            serviceSender.setContent(String.format("WhiteBread-%.2f",breadNeed));
+            serviceSender.setConversationId("Supplier");
+            myAgent.send(serviceSender);
+
+            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult,dailyTransaction);
+            double hamNeed = smaOptimaization(2,0,"Ham",weeklyResult,dailyTransaction);
+            serviceSender.setContent(String.format("Ham-%.2f",hamNeed));
+            serviceSender.setConversationId("Supplier");
+            myAgent.send(serviceSender);
+
+            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult,dailyTransaction);
+            double spreadNeed = smaOptimaization(2,0,"Spread",weeklyResult,dailyTransaction);
+            serviceSender.setContent(String.format("Spread-%.2f",spreadNeed));
+            serviceSender.setConversationId("Supplier");
+            myAgent.send(serviceSender);
+
+            /*
             //Weekly ingredients need calculation.
-            double breadNeed, hamNeed, spreadNeed;
+            double breadNeed = weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
+            double hamNeed = weeklyResult.get(weeklyResult.size() - 1).HamNeed;
+            double spreadNeed = weeklyResult.get(weeklyResult.size() - 1).SpreadNeed;
+
+            if(weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
+                breadNeed = breadNeed - dailyTransaction.get(0).WhiteBread_after;
+                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
+                serviceSender.setConversationId("Supplier");
+                myAgent.send(serviceSender);
+            }
+
             int totalWeekly = weeklyResult.get(weeklyResult.size() - 1).numOfOrder;
             ArrayList<String> queryResult = app.selectProduct("HamSandwich");
             for(int i = 0; i < queryResult.size();i++) {
@@ -333,6 +361,7 @@ public class specialistAgent extends Agent {
                     }
                 }
             }
+             */
         }
     }
 
@@ -580,6 +609,99 @@ public class specialistAgent extends Agent {
             }
 
         }
+    }
+
+    //Order prediction method that is applied for all agent types.
+    private double standardOptimzation (int percentage,String ingradName, ArrayList<weeklyResult> weeklyResult, ArrayList<ingredientTransaction> dailyTransaction){
+        double result = 0;
+        System.out.println("Ingredient request method : Standard method");      //The standard method that refilled ingredient stock based on maximum order for current week.
+        int totalWeekly = weeklyResult.get(weeklyResult.size() - 1).numOfOrder;
+        int totalReq = totalWeekly + ((totalWeekly * percentage)/100);
+        switch (ingradName){
+            case "WhiteBread":
+                double breadNeed = ((app.selectQuantity("HamSandwich", "WhiteBread")) * totalReq);
+                //weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
+                if(breadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
+                    result = (breadNeed - dailyTransaction.get(0).WhiteBread_after);
+                }else {
+                    breadNeed = 0;
+                    result = breadNeed;
+                }
+                break;
+            case "Ham":
+                double hamNeed = ((app.selectQuantity("HamSandwich", "Ham")) * totalReq);
+                if(hamNeed - dailyTransaction.get(0).Ham_after > 0){
+                    result = hamNeed - dailyTransaction.get(0).Ham_after;
+                }else {
+                    hamNeed = 0;
+                    result = hamNeed;
+                }
+                break;
+            case "Spread":
+                double spreadNeed = ((app.selectQuantity("HamSandwich", "Spread")) * totalReq);
+                if(spreadNeed - dailyTransaction.get(0).Spread_after > 0){
+                    result = spreadNeed - dailyTransaction.get(0).Spread_after;
+                }else {
+                    spreadNeed = 0;
+                    result = spreadNeed;
+                }
+                break;
+        }
+        return result;
+    }
+
+    private double smaOptimaization (int windowSize, int percentage, String ingradName, ArrayList<weeklyResult> weeklyResult, ArrayList<ingredientTransaction> dailyTransaction){
+        double result = 0;
+        System.out.println("Ingredient request method : Sliding Moving Average Optimization");      //The standard method that refilled ingredient stock based on maximum order for current week.
+        int histIdx = weeklyResult.size();
+        int avgOrder = 0;
+        if(histIdx < windowSize){
+            //the average of total order (previous to current week) is applied for next week calculation if number of window for SMA is not enought.
+            for (int i = 0; i < weeklyResult.size();i++){
+                avgOrder = avgOrder + weeklyResult.get(i).numOfOrder;
+            }
+            avgOrder = avgOrder/histIdx;
+        }else {
+            //SMA Calculation based on num of window required.
+            for(int i = histIdx - windowSize; i < histIdx; i++){
+                avgOrder = avgOrder + weeklyResult.get(i).numOfOrder;
+            }
+            avgOrder = avgOrder/windowSize;
+        }
+
+        int totalReq = avgOrder + ((avgOrder * percentage)/100);
+
+        switch (ingradName){
+            case "WhiteBread":
+                double breadNeed = ((app.selectQuantity("HamSandwich", "WhiteBread")) * totalReq);
+                //weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
+                if(breadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
+                    result = (breadNeed - dailyTransaction.get(0).WhiteBread_after);
+                }else {
+                    breadNeed = 0;
+                    result = breadNeed;
+                }
+                break;
+            case "Ham":
+                double hamNeed = ((app.selectQuantity("HamSandwich", "Ham")) * totalReq);
+                if(hamNeed - dailyTransaction.get(0).Ham_after > 0){
+                    result = hamNeed - dailyTransaction.get(0).Ham_after;
+                }else {
+                    hamNeed = 0;
+                    result = hamNeed;
+                }
+                break;
+            case "Spread":
+                double spreadNeed = ((app.selectQuantity("HamSandwich", "Spread")) * totalReq);
+                if(spreadNeed - dailyTransaction.get(0).Spread_after > 0){
+                    result = spreadNeed - dailyTransaction.get(0).Spread_after;
+                }else {
+                    spreadNeed = 0;
+                    result = spreadNeed;
+                }
+                break;
+        }
+        return result;
     }
 
     private class ingredientTransaction{

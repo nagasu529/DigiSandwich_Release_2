@@ -27,15 +27,15 @@ public class supplierAgent extends Agent {
     ArrayList<weeklyReport> stockOfIngredients = new ArrayList<>();
     ArrayList<weeklyReport> requestFromSpecialist = new ArrayList<>();
 
-    int orderTimer = 10000;
+    int dayTimer = 10000;
     int dayCount = 0;
     int weekCount = 1;
 
     double numOfStock = 300000;
 
-    String supplierStock = "test-supplierStock";
-    String ingredientReq = "test-ingredientReq";
-    String refillStock = "test-refillStock";
+    String supplierStock = "over20Pct-test-supplierStock";
+    String ingredientReq = "over20Pct-test-ingredientReq";
+    String refillStock = "over20Pct-test-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -43,13 +43,14 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
-    String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //PC Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -142,7 +143,7 @@ public class supplierAgent extends Agent {
 
 
         //Add a TickerBehaviour to refill supply (1 time a week).
-        addBehaviour(new TickerBehaviour(this, orderTimer){
+        addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 //Day count added.
                 dayCount++;
@@ -345,6 +346,13 @@ public class supplierAgent extends Agent {
         }
     }
 
+    //Order prediction method that is applied for all agent types.
+    private double stockOptimization (int percentage, String ingradName, ArrayList<weeklyReport> weeklyResult){
+        double result = 0;
+        System.out.println("Ingredient request method : Standard method");      //The standard method that refilled ingredient stock based on maximum order for current week.
+
+        return result;
+    }
     /**
      Inner class PurchaseOrdersServer.
      This is the behaviour used by Book-seller agents to serve incoming

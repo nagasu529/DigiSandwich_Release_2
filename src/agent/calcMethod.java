@@ -1561,5 +1561,4 @@ public class calcMethod {
             return resultList;
         }
     }
-    
 }
