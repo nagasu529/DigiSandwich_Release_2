@@ -26,6 +26,7 @@ public class supplierAgent extends Agent {
     ArrayList<supplierInfo> sellingProductList = new ArrayList<>();
     ArrayList<weeklyReport> stockOfIngredients = new ArrayList<>();
     ArrayList<weeklyReport> requestFromSpecialist = new ArrayList<>();
+    ArrayList<weeklyReport> refillStockList = new ArrayList<>();
 
     int dayTimer = 10000;
     int dayCount = 0;
@@ -33,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double numOfStock = 300000;
 
-    String supplierStock = "over20Pct-test-supplierStock";
-    String ingredientReq = "over20Pct-test-ingredientReq";
-    String refillStock = "over20Pct-test-refillStock";
+    String supplierStock = "large-SPK30DW5D-SMA2Over20Pct-supplierStock";
+    String ingredientReq = "large-SPK30DW5D-SMA2Over20Pct-ingredientReq";
+    String refillStock = "large-SPK30DW5D-SMA2Over20Pct-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -81,6 +82,13 @@ public class supplierAgent extends Agent {
         try {
             String[] ingredientReqIndex = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
             calc.createCSV(ingredientReqClasspath,ingredientReqIndex);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+
+        try {
+            String[] refillStockIdx = {"Week","WhiteBread","Ham","Onion","Pickle","Tuna","Spread"};
+            calc.createCSV(refillStockClasspath,refillStockIdx);
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -158,20 +166,68 @@ public class supplierAgent extends Agent {
                         String productName = sellingProductList.get(i).productName;
                         switch (productName){
                             case "WhiteBread":
+                                /*
+                                //Normal case
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - sellingProductList.get(i).numOfstock;
+                                if(stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread < 0){
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread);
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = 0;
+                                }else {
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread);
+
+                                }
+                                sellingProductList.get(i).numOfstock = 0;
+
+                                 */
+
+
+                                //Don't case about supplier stock
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - sellingProductList.get(i).numOfstock;
                                 if(sellingProductList.get(i).numOfstock > 0){
                                     updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
                                 }
                                 sellingProductList.get(i).numOfstock = 0;
+
                                 break;
                             case "Ham":
+                                /*
+                                //Normal case
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - sellingProductList.get(i).numOfstock;
+                                if(stockOfIngredients.get(stockOfIngredients.size() - 1).Ham < 0){
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).Ham);
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = 0;
+                                }else {
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 1).Ham);
+                                }
+                                sellingProductList.get(i).numOfstock = 0;
+
+                                 */
+
+
+                                //Don't case about supplier stock
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - sellingProductList.get(i).numOfstock;
                                 if(sellingProductList.get(i).numOfstock > 0){
                                     updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
                                 }
                                 sellingProductList.get(i).numOfstock = 0;
+
                                 break;
                             case "Spread":
+                                /*
+                                //Normal case
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - sellingProductList.get(i).numOfstock;
+                                if(stockOfIngredients.get(stockOfIngredients.size() - 1).Spread < 0){
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).Spread);
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = 0;
+
+                                }else {
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 1).Spread);
+                                }
+                                sellingProductList.get(i).numOfstock = 0;
+
+                                 */
+
+                                //Don't case about supplier stock
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - sellingProductList.get(i).numOfstock;
                                 if(sellingProductList.get(i).numOfstock > 0){
                                     updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
@@ -188,7 +244,7 @@ public class supplierAgent extends Agent {
                     }
                 }
 
-                if(day == "Tuesday" && dayCount > 8){
+                if(day == "Tuesday"){
                     //addBehaviour(new refilledStock());
                 }
 
@@ -317,16 +373,24 @@ public class supplierAgent extends Agent {
     //Agent state for order refill stock if needed.
     private class refilledStock extends OneShotBehaviour {
         public void action(){
-            //History data checking.
-            int numOfweeks = stockOfIngredients.size();
-            //The first three week if we do not have enough data, going to stock with maximum capacity as a first priority.
-            if(numOfweeks < 2){
+            //method 0 is standard and 1 is SMA
+            double breadNeed = stockOptimization(0,0,"WhiteBread",stockOfIngredients);
+            double hamNeed = stockOptimization(0,0,"Ham",stockOfIngredients);
+            double spreadNeed = stockOptimization(0,0,"Spread",stockOfIngredients);
 
-            }else{
+            //refill stock to refrigerator
+            stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = breadNeed;
+            stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = hamNeed;
+            stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = spreadNeed;
+            //adding new row to list.
+            refillStockList.add(new weeklyReport(weekCount,breadNeed,hamNeed,0,0,0,spreadNeed));
 
+            //CSV writing.
+            try {
+                calc.updateCSVFile(refillStockClasspath, refillStockList.get(refillStockList.size() - 1).rowData());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-
-            //getting data with SMA for three week.
         }
     }
 
@@ -347,12 +411,138 @@ public class supplierAgent extends Agent {
     }
 
     //Order prediction method that is applied for all agent types.
-    private double stockOptimization (int percentage, String ingradName, ArrayList<weeklyReport> weeklyResult){
+    private double stockOptimization (int method, int percentage, String ingradName, ArrayList<supplierAgent.weeklyReport> weeklyResult){
         double result = 0;
-        System.out.println("Ingredient request method : Standard method");      //The standard method that refilled ingredient stock based on maximum order for current week.
+        String optDetail ="";
+        int historyRecord = weeklyResult.size();
+        switch (method){
+            case 0:
+                //The standard method that refilled ingredient stock based on maximum order for current week.
+                optDetail = "Ingredient request method : Standard method";
+                if(historyRecord < 2){
+                    switch (ingradName){
+                        case "WhiteBread":
+                            result = weeklyResult.get(0).WhiteBread;
+                            break;
+                        case "Ham":
+                            result = weeklyResult.get(0).Ham;
+                            break;
+                        case "Spread":
+                            result = weeklyResult.get(0).Spread;
+                            break;
+                    }
+                }else {
+                    switch (ingradName){
+                        case "WhiteBread":
+                            double maxStockBread = weeklyResult.get(0).WhiteBread;
+                            double breadLastWeek = weeklyResult.get(weeklyResult.size() - 2).WhiteBread - weeklyResult.get(weeklyResult.size() - 1).WhiteBread;
+                            if(weeklyResult.get(weeklyResult.size() - 1).WhiteBread > breadLastWeek && (breadLastWeek * 2) < maxStockBread){
+                                result = 0;
+                            }else {
+                                result = breadLastWeek + (breadLastWeek * (percentage/100));
+                                if(result > maxStockBread){
+                                    result = maxStockBread - weeklyResult.get(weeklyResult.size() - 1).WhiteBread;
+                                }
+                            }
+                            break;
+                        case "Ham":
+                            double maxStockHam = weeklyResult.get(0).Ham;
+                            double hamLastWeek = weeklyResult.get(weeklyResult.size() - 2).Ham - weeklyResult.get(weeklyResult.size() - 1).Ham;
+                            if(weeklyResult.get(weeklyResult.size() - 1).Ham > hamLastWeek && (hamLastWeek * 2) < maxStockHam){
+                                result = 0;
+                            }else {
+                                result = hamLastWeek + (hamLastWeek * (percentage/100));
+                                if(result > maxStockHam){
+                                    result = maxStockHam - weeklyResult.get(weeklyResult.size() - 1).Ham;
+                                }
+                            }
+                            break;
+                        case "Spread":
+                            double maxStockSpread = weeklyResult.get(0).Spread;
+                            double spreadLastWeek = weeklyResult.get(weeklyResult.size() - 2).Spread - weeklyResult.get(weeklyResult.size() - 1).Spread;
+                            if(weeklyResult.get(weeklyResult.size() - 1).Ham > spreadLastWeek && (spreadLastWeek * 2) < maxStockSpread){
+                                result = 0;
+                            }else {
+                                result = spreadLastWeek + (spreadLastWeek * (percentage/100));
+                                if(result > maxStockSpread){
+                                    result = maxStockSpread - weeklyResult.get(weeklyResult.size() -1).Spread;
+                                }
+                            }
+                    }
+                }
+                break;
+            case 1:
+                optDetail = "Ingredient request method : SMA";
+                if(historyRecord < 2){
+                    switch (ingradName){
+                        case "WhiteBread":
+                            result = weeklyResult.get(0).WhiteBread;
+                            break;
+                        case "Ham":
+                            result = weeklyResult.get(0).Ham;
+                            break;
+                        case "Spread":
+                            result = weeklyResult.get(0).Spread;
+                            break;
+                    }
+                }else {
+                    double tempSMAValue = 0;
+                    switch (ingradName){
+                        case "WhiteBread":
+                            double maxStockBread = weeklyResult.get(0).WhiteBread;
+                            for(int j = historyRecord; j > 0 ; j--){
+                                tempSMAValue = tempSMAValue + weeklyResult.get(j -1).WhiteBread;
+                            }
+                            tempSMAValue = tempSMAValue/historyRecord;
+                            if(weeklyResult.get(weeklyResult.size() - 1).WhiteBread > tempSMAValue && (tempSMAValue * 2) < maxStockBread){
+                                result = 0;
+                            }else {
+                                result = tempSMAValue + (tempSMAValue * (percentage/100));
+                                if(result > maxStockBread){
+                                    result = maxStockBread - weeklyResult.get(weeklyResult.size() -1).WhiteBread;
+                                }
+                            }
+                            break;
+                        case "Ham":
+                            double maxStockHam = weeklyResult.get(0).Ham;
+                            for(int j = historyRecord; j > 0 ; j--){
+                                tempSMAValue = tempSMAValue + weeklyResult.get(j -1).Ham;
+                            }
+                            tempSMAValue = tempSMAValue/historyRecord;
+                            if(weeklyResult.get(weeklyResult.size() - 1).Ham > tempSMAValue && (tempSMAValue * 2) < maxStockHam){
+                                result = 0;
+                            }else {
+                                result = tempSMAValue + (tempSMAValue * (percentage/100));
+                                if(result > maxStockHam){
+                                    result = maxStockHam - weeklyResult.get(weeklyResult.size() -1).Ham;
+                                }
+                            }
+                            break;
+                        case "Spread":
+                            double maxStockSpread = weeklyResult.get(0).Spread;
+                            for(int j = historyRecord; j > 0 ; j--){
+                                tempSMAValue = tempSMAValue + weeklyResult.get(j -1).Spread;
+                            }
+                            tempSMAValue = tempSMAValue/historyRecord;
+                            if(weeklyResult.get(weeklyResult.size() - 1).Spread > tempSMAValue && (tempSMAValue * 2) < maxStockSpread){
+                                result = 0;
+                            }else {
+                                result = tempSMAValue + (tempSMAValue * (percentage/100));
+                                if(result > maxStockSpread){
+                                    result = maxStockSpread - weeklyResult.get(weeklyResult.size() -1).Spread;
+                                }
+                            }
+                            break;
+                    }
+                }
+                break;
+
+        }
+        System.out.println(optDetail + "                    : " + result);
 
         return result;
     }
+
     /**
      Inner class PurchaseOrdersServer.
      This is the behaviour used by Book-seller agents to serve incoming

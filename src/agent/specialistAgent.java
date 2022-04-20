@@ -32,7 +32,7 @@ public class specialistAgent extends Agent {
     ArrayList<calcMethod.supplierInfo> supplierDataList = new ArrayList<>();   //List of available ingredient
     ArrayList<calcMethod.customerInfo> customerDataList = new ArrayList<>();   //List of request orders.
 
-    ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weeekly report.
+    ArrayList<weeklyResult> weeklyResult = new ArrayList<>();                  //The data collection for weekly report.
     ArrayList<ingredientTransaction> dailyTransaction = new ArrayList<>();
 
     calcMethod calcMethod = new calcMethod();
@@ -42,8 +42,8 @@ public class specialistAgent extends Agent {
     int dayTimeCount = 0;
 
     //Initialize value befor calculation
-    String dailyName = "over20Pct-test-dailyResult";
-    String weeklyName = "over20Pct-test-weeklyResult";
+    String dailyName = "large-SPK30DW5D-SMA2Over20Pct-dailyResult";
+    String weeklyName = "large-SPK30DW5D-SMA2Over20Pct-weeklyResult";
 
     //Create CSV classpath.
     //Home PC classpath.
@@ -260,6 +260,7 @@ public class specialistAgent extends Agent {
         private AID[] supplierAgent;
         public void action(){
             int overEstPct = 20;
+            int windowSize = 2;
 
 
             //Searching specialist agent and created address table.
@@ -284,19 +285,19 @@ public class specialistAgent extends Agent {
             }
 
             //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult,dailyTransaction);
-            double breadNeed = smaOptimaization(2,0,"WhiteBread",weeklyResult,dailyTransaction);
+            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult,dailyTransaction);
             serviceSender.setContent(String.format("WhiteBread-%.2f",breadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
             //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult,dailyTransaction);
-            double hamNeed = smaOptimaization(2,0,"Ham",weeklyResult,dailyTransaction);
+            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult,dailyTransaction);
             serviceSender.setContent(String.format("Ham-%.2f",hamNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
             //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult,dailyTransaction);
-            double spreadNeed = smaOptimaization(2,0,"Spread",weeklyResult,dailyTransaction);
+            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult,dailyTransaction);
             serviceSender.setContent(String.format("Spread-%.2f",spreadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
