@@ -32,11 +32,11 @@ public class supplierAgent extends Agent {
     int dayCount = 0;
     int weekCount = 1;
 
-    double maxStockCapacity = 300000;
+    double maxStockCapacity = 3000000;
 
-    String supplierStock = "large-SPK30DW5D-SMA2Over20Pct-supplierStock";
-    String ingredientReq = "large-SPK30DW5D-SMA2Over20Pct-ingredientReq";
-    String refillStock = "large-SPK30DW5D-SMA2Over20Pct-refillStock";
+    String supplierStock = "med-SPK30DW5D-stdOpt-supplierStock";
+    String ingredientReq = "med-SPK30DW5D-stdOpt-ingredientReq";
+    String refillStock = "med-SPK30DW5D-stdOpt-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -54,16 +54,17 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //PC Office classpath
-    String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+
+    //OSX classpath
+    String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
 
 
     //Request from specialist classpath
-
-
-
-
     protected void setup() {
         try {
             Thread.sleep(100);
@@ -162,11 +163,13 @@ public class supplierAgent extends Agent {
                     //Initialize for current week stock writing.
                     stockOfIngredients.add(new weeklyReport(weekCount,0,0,0,0,0,0));
                     for (int i=0; i < sellingProductList.size();i++){
+                        System.out.println(String.format("Current stage of sellingProductList on  %s    value:   %.02f",sellingProductList.get(i).productName, sellingProductList.get(i).numOfstock));
+
                         //Checking ingredient delivery request.
                         String productName = sellingProductList.get(i).productName;
                         switch (productName){
                             case "WhiteBread":
-
+                                /*
                                 //Normal case
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - sellingProductList.get(i).numOfstock;
                                 if(stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread < 0){
@@ -178,18 +181,20 @@ public class supplierAgent extends Agent {
                                 }
                                 sellingProductList.get(i).numOfstock = 0;
 
-                                /*
-                                //Don't case about supplier stock
-                                stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - sellingProductList.get(i).numOfstock;
-                                if(sellingProductList.get(i).numOfstock > 0){
-                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
-                                }
-                                //sellingProductList.get(i).numOfstock = 0;
                                  */
 
+
+                                //Normal case
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - requestFromSpecialist.get(requestFromSpecialist.size() - 1).WhiteBread;
+                                if(stockOfIngredients.get(stockOfIngredients.size() -1).WhiteBread < 0){
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = 0;
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread);
+                                }else{
+                                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade, requestFromSpecialist.get(requestFromSpecialist.size() - 1).WhiteBread);
+                                }
                                 break;
                             case "Ham":
-
+                                /*
                                 //Normal case
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - sellingProductList.get(i).numOfstock;
                                 if(stockOfIngredients.get(stockOfIngredients.size() - 1).Ham < 0){
@@ -200,7 +205,6 @@ public class supplierAgent extends Agent {
                                 }
                                 sellingProductList.get(i).numOfstock = 0;
 
-                                /*
                                 //Don't case about supplier stock
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - sellingProductList.get(i).numOfstock;
                                 if(sellingProductList.get(i).numOfstock > 0){
@@ -208,11 +212,20 @@ public class supplierAgent extends Agent {
                                 }
                                 //sellingProductList.get(i).numOfstock = 0;
 
-                                break;
                                  */
+                                //Normal case
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - requestFromSpecialist.get(requestFromSpecialist.size() - 1).Ham;
+                                if(stockOfIngredients.get(stockOfIngredients.size() -1).Ham < 0){
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = 0;
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).Ham);
+                                }else{
+                                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade, requestFromSpecialist.get(requestFromSpecialist.size() - 1).Ham);
+                                }
+                                break;
+
 
                             case "Spread":
-
+                                /*
                                 //Normal case
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - sellingProductList.get(i).numOfstock;
                                 if(stockOfIngredients.get(stockOfIngredients.size() - 1).Spread < 0){
@@ -224,15 +237,21 @@ public class supplierAgent extends Agent {
                                 }
                                 sellingProductList.get(i).numOfstock = 0;
 
-                                /*
                                 //Don't case about supplier stock
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - sellingProductList.get(i).numOfstock;
                                 if(sellingProductList.get(i).numOfstock > 0){
                                     updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, sellingProductList.get(i).numOfstock);
                                 }
-                                //sellingProductList.get(i).numOfstock = 0;
-                                break;
                                  */
+                                //Normal case
+                                stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - requestFromSpecialist.get(requestFromSpecialist.size() - 1).Spread;
+                                if(stockOfIngredients.get(stockOfIngredients.size() -1).Spread < 0){
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = 0;
+                                    updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).Spread);
+                                }else{
+                                    updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade, requestFromSpecialist.get(requestFromSpecialist.size() - 1).Spread);
+                                }
+                                break;
                         }
                     }
                     //Writing to stockUpdate for each week to CSV
@@ -244,7 +263,7 @@ public class supplierAgent extends Agent {
                 }
 
                 if(day == "Tuesday" && dayCount > 6){
-                    addBehaviour(new refilledStock());
+                    //addBehaviour(new refilledStock());
                 }
 
                 if(day == "Saturday"){

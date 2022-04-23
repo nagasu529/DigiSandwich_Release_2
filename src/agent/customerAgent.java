@@ -37,7 +37,7 @@ public class customerAgent extends Agent {
     int weekCount = 1;
     int initialOrder = 0;
 
-    int spikePeriod = 75;        //num of day for spike order.
+    int spikePeriod = 5;        //num of day for spike order.
 
     //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
@@ -89,7 +89,7 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-
+                /*
                 initialOrder = customerInfo.get(0).numOfOrder;
                 if(weekCount > 1 && spikePeriod > 0){
                     customerInfo.get(0).numOfOrder = spikePeriod(1,numOfOrder,30);
@@ -97,13 +97,14 @@ public class customerAgent extends Agent {
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
+                 */
 
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
                 if(timePeriod % 7 == 0){
-                    //initialOrder = customerInfo.get(0).numOfOrder;
+                    initialOrder = customerInfo.get(0).numOfOrder;
                     weekCount++;
                     System.out.println("weekly " + weekCount);
-                    //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
+                    customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
                     //initOrder = customerInfo.get(0).numOfOrder;
                     //timePeriod = 0;
                 }
