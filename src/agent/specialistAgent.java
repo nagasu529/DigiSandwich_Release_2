@@ -38,22 +38,24 @@ public class specialistAgent extends Agent {
     calcMethod calcMethod = new calcMethod();
     DatabaseConn app = new DatabaseConn();
 
+    //Initialize value befor calculation
+    String dailyName = "RN-stdOver20Pct-dailyResult";
+    String weeklyName = "RN-stdOver20Pct-weeklyResult";
+
     //Initial order value stage.
-    double numBread = 1200000;
-    double numHam = 700000;
-    double numSpread = 100000;
+    double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
+
+    double numBread = app.selectQuantity("HamSandwich","WhiteBread") * numOfIngradforProduct;
+    double numHam = app.selectQuantity("HamSandwich","Ham") * numOfIngradforProduct;
+    double numSpread = app.selectQuantity("HamSandwich","Spread") * numOfIngradforProduct;
 
     int dayTimer = 10000;
     int dayTimeCount = 0;
 
-    //Initialize value befor calculation
-    String dailyName = "med-SPK30DW5D-stdOpt-dailyResult";
-    String weeklyName = "med-SPK30DW5D-stdOpt-weeklyResult";
-
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
@@ -64,8 +66,8 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
-    String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
-    String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
+    //String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
+    //String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
 
     String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
@@ -264,7 +266,7 @@ public class specialistAgent extends Agent {
     private class nextWeekIngradReq extends OneShotBehaviour{
         private AID[] supplierAgent;
         public void action(){
-            int overEstPct = 0;
+            int overEstPct = 20;
             int windowSize = 2;
 
 
@@ -627,16 +629,16 @@ public class specialistAgent extends Agent {
             case "WhiteBread":
                 double breadNeed = ((app.selectQuantity("HamSandwich", "WhiteBread")) * totalReq);
                 //weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
-                if((dailyTransaction.get(0).WhiteBread_after - (breadNeed *2)) > 0){
+                if((dailyTransaction.get(0).WhiteBread_after - (breadNeed * 2)) > 0){
                     breadNeed = 0;
                     result = breadNeed;
                 }else {
-                    result = (breadNeed *2) - dailyTransaction.get(0).WhiteBread_after;
+                    result = (breadNeed * 2) - dailyTransaction.get(0).WhiteBread_after;
                 }
                 break;
             case "Ham":
                 double hamNeed = ((app.selectQuantity("HamSandwich", "Ham")) * totalReq);
-                if(dailyTransaction.get(0).Ham_after - (hamNeed *2) > 0){
+                if(dailyTransaction.get(0).Ham_after - (hamNeed * 2) > 0){
                     hamNeed = 0;
                     result = hamNeed;
                 }else {

@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 3000000;
 
-    String supplierStock = "med-SPK30DW5D-stdOpt-supplierStock";
-    String ingredientReq = "med-SPK30DW5D-stdOpt-ingredientReq";
-    String refillStock = "med-SPK30DW5D-stdOpt-refillStock";
+    String supplierStock = "RN-stdOver20Pct-supplierStock";
+    String ingredientReq = "RN-stdOver20Pct-ingredientReq";
+    String refillStock = "RN-stdOver20Pct-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -44,9 +44,9 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    //String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -59,9 +59,9 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //OSX classpath
-    String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
 
 
     //Request from specialist classpath
