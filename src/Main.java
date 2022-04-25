@@ -2,11 +2,11 @@ import jade.Boot;
 
 public class Main {
     public static void main(String[] args){
-        int customerSize = 1;
+        int customerSize = 5;
         StringBuilder customerStartText = new StringBuilder();
         for (int i = 0; i < customerSize; i++){
-            String tempText = String.format("customer%d:agent.raynorCustomerAgent;",i + 1);       //Row data from Raynor's
-            //String tempText = String.format("customer%d:agent.customerAgent;",i + 1);
+            //String tempText = String.format("customer%d:agent.raynorCustomerAgent;",i + 1);       //Row data from Raynor's
+            String tempText = String.format("customer%d:agent.customerAgent;",i + 1);
             customerStartText.append(tempText);
         }
 

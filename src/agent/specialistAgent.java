@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "RN-stdOver20Pct-dailyResult";
-    String weeklyName = "RN-stdOver20Pct-weeklyResult";
+    String dailyName = "ShiftDown-med-SMA20Over-dailyResult";
+    String weeklyName = "ShiftDown-med-SMA20Over-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -291,20 +291,20 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
-            double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult,dailyTransaction);
-            //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult,dailyTransaction);
+            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult,dailyTransaction);
+            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult,dailyTransaction);
             serviceSender.setContent(String.format("WhiteBread-%.2f",breadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult,dailyTransaction);
-            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult,dailyTransaction);
+            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult,dailyTransaction);
+            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult,dailyTransaction);
             serviceSender.setContent(String.format("Ham-%.2f",hamNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult,dailyTransaction);
-            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult,dailyTransaction);
+            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult,dailyTransaction);
+            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult,dailyTransaction);
             serviceSender.setContent(String.format("Spread-%.2f",spreadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
@@ -629,29 +629,29 @@ public class specialistAgent extends Agent {
             case "WhiteBread":
                 double breadNeed = ((app.selectQuantity("HamSandwich", "WhiteBread")) * totalReq);
                 //weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
-                if((dailyTransaction.get(0).WhiteBread_after - (breadNeed * 2)) > 0){
+                if((dailyTransaction.get(0).WhiteBread_after - (breadNeed * 1.25)) > 0){
                     breadNeed = 0;
                     result = breadNeed;
                 }else {
-                    result = (breadNeed * 2) - dailyTransaction.get(0).WhiteBread_after;
+                    result = (breadNeed * 1.25) - dailyTransaction.get(0).WhiteBread_after;
                 }
                 break;
             case "Ham":
                 double hamNeed = ((app.selectQuantity("HamSandwich", "Ham")) * totalReq);
-                if(dailyTransaction.get(0).Ham_after - (hamNeed * 2) > 0){
+                if(dailyTransaction.get(0).Ham_after - (hamNeed * 1.25) > 0){
                     hamNeed = 0;
                     result = hamNeed;
                 }else {
-                    result = (hamNeed * 2) - dailyTransaction.get(0).Ham_after;
+                    result = (hamNeed * 1.25) - dailyTransaction.get(0).Ham_after;
                 }
                 break;
             case "Spread":
                 double spreadNeed = ((app.selectQuantity("HamSandwich", "Spread")) * totalReq);
-                if(dailyTransaction.get(0).Spread_after - (spreadNeed * 2) > 0){
+                if(dailyTransaction.get(0).Spread_after - (spreadNeed * 1.25) > 0){
                     spreadNeed = 0;
                     result = spreadNeed;
                 }else {
-                    result = (spreadNeed * 2) - dailyTransaction.get(0).Spread_after;
+                    result = (spreadNeed * 1.25) - dailyTransaction.get(0).Spread_after;
                 }
                 break;
         }

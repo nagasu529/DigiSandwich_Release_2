@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 3000000;
 
-    String supplierStock = "RN-stdOver20Pct-supplierStock";
-    String ingredientReq = "RN-stdOver20Pct-ingredientReq";
-    String refillStock = "RN-stdOver20Pct-refillStock";
+    String supplierStock = "ShiftDown-med-SMA20Over-supplierStock";
+    String ingredientReq = "ShiftDown-med-SMA20Over-ingredientReq";
+    String refillStock = "ShiftDown-med-SMA20Over-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
