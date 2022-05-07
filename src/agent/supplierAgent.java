@@ -28,15 +28,15 @@ public class supplierAgent extends Agent {
     ArrayList<weeklyReport> requestFromSpecialist = new ArrayList<>();
     ArrayList<weeklyReport> refillStockList = new ArrayList<>();
 
-    int dayTimer = 10000;
+    int dayTimer = 7000;
     int dayCount = 0;
     int weekCount = 1;
 
-    double maxStockCapacity = 3000000;
+    double maxStockCapacity = 1000000;
 
-    String supplierStock = "ShiftDown-med-SMA20Over-supplierStock";
-    String ingredientReq = "ShiftDown-med-SMA20Over-ingredientReq";
-    String refillStock = "ShiftDown-med-SMA20Over-refillStock";
+    String supplierStock = "testRefillStock-supplierStock";
+    String ingredientReq = "testRefillStock-ingredientReq";
+    String refillStock = "testRefillStock-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -44,9 +44,9 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -59,9 +59,9 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //OSX classpath
-    //String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
-    //String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
+    String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
 
 
     //Request from specialist classpath
@@ -116,6 +116,13 @@ public class supplierAgent extends Agent {
         addBehaviour(new receivingSupplyRequest());
 
         //First week intialise for Raynor's stock
+        stockOfIngredients.add(new weeklyReport(weekCount,maxStockCapacity,maxStockCapacity,maxStockCapacity,maxStockCapacity,maxStockCapacity,maxStockCapacity));
+
+        sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",0));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",0));
+        sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",0));
+
+        /*
         sellingProductList.add(new supplierInfo(getLocalName(),"WhiteBread","general",maxStockCapacity));
         sellingProductList.add(new supplierInfo(getLocalName(),"Ham","general",maxStockCapacity));
         sellingProductList.add(new supplierInfo(getLocalName(),"Spread","general",maxStockCapacity));
@@ -141,15 +148,15 @@ public class supplierAgent extends Agent {
                     sellingProductList.get(i).numOfstock = 0;
                     break;
             }
-
         }
+        */
+
         //Writing to initialize stock at first week
         try {
             calc.updateCSVFile(supplierStockClasspath,stockOfIngredients.get(0).rowData());
         }catch (IOException e){
             e.printStackTrace();
         }
-
 
         //Add a TickerBehaviour to refill supply (1 time a week).
         addBehaviour(new TickerBehaviour(this, dayTimer){
@@ -216,8 +223,8 @@ public class supplierAgent extends Agent {
                                 //Normal case
                                 stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - requestFromSpecialist.get(requestFromSpecialist.size() - 1).Ham;
                                 if(stockOfIngredients.get(stockOfIngredients.size() -1).Ham < 0){
-                                    stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = 0;
                                     updateProduct(getLocalName(),productName, sellingProductList.get(i).ingredientGrade, stockOfIngredients.get(stockOfIngredients.size() - 2).Ham);
+                                    stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = 0;
                                 }else{
                                     updateProduct(getLocalName(),productName,sellingProductList.get(i).ingredientGrade, requestFromSpecialist.get(requestFromSpecialist.size() - 1).Ham);
                                 }
@@ -263,7 +270,7 @@ public class supplierAgent extends Agent {
                 }
 
                 if(day == "Tuesday" && dayCount > 6){
-                    //addBehaviour(new refilledStock());
+                    addBehaviour(new refilledStock());
                 }
 
                 if(day == "Saturday"){
@@ -400,9 +407,9 @@ public class supplierAgent extends Agent {
             double spreadNeed = stockOptimization(0,0,"Spread",stockOfIngredients);
 
             //refill stock to refrigerator
-            stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = breadNeed;
-            stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = hamNeed;
-            stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = spreadNeed;
+            stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread + breadNeed;
+            stockOfIngredients.get(stockOfIngredients.size() - 1).Ham = stockOfIngredients.get(stockOfIngredients.size() -1).Ham + hamNeed;
+            stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 1).Spread + spreadNeed;
             //adding new row to list.
             refillStockList.add(new weeklyReport(weekCount,breadNeed,hamNeed,0,0,0,spreadNeed));
 
@@ -440,19 +447,19 @@ public class supplierAgent extends Agent {
             case 0:
                 //The standard method that refilled ingredient stock based on maximum order for current week.
                 optDetail = "Ingredient request method : Standard method";
-                if(historyRecord == 1){
+                if(historyRecord <= 1){
                     result = 0;
                 }else {
                     switch (ingradName){
                         case "WhiteBread":
-                            double maxStockBread = weeklyResult.get(0).WhiteBread;
+                            //double maxStockBread = weeklyResult.get(0).WhiteBread;      //Getting maximum stock capacity.
                             double breadLastWeek = weeklyResult.get(weeklyResult.size() - 2).WhiteBread - weeklyResult.get(weeklyResult.size() - 1).WhiteBread;
-                            if(weeklyResult.get(weeklyResult.size() - 1).WhiteBread > breadLastWeek && (breadLastWeek * 2) < maxStockBread){
+                            if(weeklyResult.get(weeklyResult.size() - 1).WhiteBread > (breadLastWeek * 2)){
                                 result = 0;
                             }else {
                                 result = breadLastWeek + (breadLastWeek * (percentage/100));
-                                if(result > maxStockBread){
-                                    result = maxStockBread - weeklyResult.get(weeklyResult.size() - 1).WhiteBread;
+                                if(result > weeklyResult.get(0).WhiteBread){
+                                    result = weeklyResult.get(0).WhiteBread - weeklyResult.get(weeklyResult.size() - 1).WhiteBread;
                                 }
                             }
                             break;
