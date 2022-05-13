@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "testRefillStock-dailyResult";
-    String weeklyName = "testRefillStock-weeklyResult";
+    String dailyName = "med-SpikDown30-10D-std-dailyResult";
+    String weeklyName = "med-SpikDown30-10D-std-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -49,7 +49,7 @@ public class specialistAgent extends Agent {
     double numHam = app.selectQuantity("HamSandwich","Ham") * numOfIngradforProduct;
     double numSpread = app.selectQuantity("HamSandwich","Spread") * numOfIngradforProduct;
 
-    int dayTimer = 7000;
+    int dayTimer = 15000;
     int dayTimeCount = 0;
 
     //Create CSV classpath.

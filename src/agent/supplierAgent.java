@@ -28,15 +28,15 @@ public class supplierAgent extends Agent {
     ArrayList<weeklyReport> requestFromSpecialist = new ArrayList<>();
     ArrayList<weeklyReport> refillStockList = new ArrayList<>();
 
-    int dayTimer = 7000;
+    int dayTimer = 15000;
     int dayCount = 0;
     int weekCount = 1;
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "testRefillStock-supplierStock";
-    String ingredientReq = "testRefillStock-ingredientReq";
-    String refillStock = "testRefillStock-refillStock";
+    String supplierStock = "med-SpikDown30-10D-std-supplierStock";
+    String ingredientReq = "med-SpikDown30-10D-std-ingredientReq";
+    String refillStock = "med-SpikDown30-10D-std-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -401,10 +401,13 @@ public class supplierAgent extends Agent {
     //Agent state for order refill stock if needed.
     private class refilledStock extends OneShotBehaviour {
         public void action(){
+            //Initialize
+            int method = 0;
+            int percentage = 0;
             //method 0 is standard and 1 is SMA
-            double breadNeed = stockOptimization(0,0,"WhiteBread",stockOfIngredients);
-            double hamNeed = stockOptimization(0,0,"Ham",stockOfIngredients);
-            double spreadNeed = stockOptimization(0,0,"Spread",stockOfIngredients);
+            double breadNeed = stockOptimization(method,percentage,"WhiteBread",stockOfIngredients);
+            double hamNeed = stockOptimization(method,percentage,"Ham",stockOfIngredients);
+            double spreadNeed = stockOptimization(method,percentage,"Spread",stockOfIngredients);
 
             //refill stock to refrigerator
             stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread + breadNeed;

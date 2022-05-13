@@ -3,6 +3,7 @@ package agent;
 import database.DatabaseConn;
 import jade.core.AID;
 import jade.core.Agent;
+import jade.core.behaviours.Behaviour;
 import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.OneShotBehaviour;
 import jade.core.behaviours.TickerBehaviour;
@@ -32,12 +33,13 @@ public class customerAgent extends Agent {
     int shiftUnit = 0;
     int shiftStatus = 0;        //(shiftStatus,shiftUnit)  =  (0,0) is stable, (0,x) shift up and others shift down.
 
-    int dayTimer = 7000;
+    int dayNumOf = 65;
+    int dayTimer = 15000;
     int timePeriod = 0;
     int weekCount = 1;
     int initialOrder = 0;
 
-    int spikePeriod = 100;        //num of day for spike order.
+    int spikePeriod = 10;        //num of day for spike order.
 
     //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
@@ -89,22 +91,21 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-                /*
+
                 initialOrder = customerInfo.get(0).numOfOrder;
                 if(weekCount > 1 && spikePeriod > 0){
-                    customerInfo.get(0).numOfOrder = spikePeriod(1,numOfOrder,30);
+                    customerInfo.get(0).numOfOrder = spikePeriod(2,numOfOrder,30);
                     spikePeriod--;
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
-                */
 
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
                 if(timePeriod % 7 == 0){
-                    initialOrder = customerInfo.get(0).numOfOrder;
+                    //initialOrder = customerInfo.get(0).numOfOrder;
                     weekCount++;
                     //System.out.println("weekly " + weekCount);
-                    customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
+                    //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
                     //initOrder = customerInfo.get(0).numOfOrder;
                     //timePeriod = 0;
                 }
@@ -201,6 +202,71 @@ public class customerAgent extends Agent {
             else {
                 block();
             }
+        }
+    }
+
+    private class customerBehaviour extends Behaviour {
+        private AID[] specialistAgent; //The specialist location contain
+        private MessageTemplate mt;
+        private int step = 0;
+        public void action(){
+            switch (step){
+                case 0:
+                    //Searching for current specialist.
+                    DFAgentDescription template = new DFAgentDescription();
+                    ServiceDescription sdSearch = new ServiceDescription();
+                    sdSearch.setType("specialist");
+                    template.addServices(sdSearch);
+                    try {
+                        DFAgentDescription[] searchResult = DFService.search(myAgent, template);
+                        specialistAgent = new AID[searchResult.length];
+                        for (int i = 0; i < searchResult.length; ++i) {
+                            specialistAgent[i] = searchResult[i].getName();
+                        }
+                    } catch (FIPAException e) {
+                        e.printStackTrace();
+                    }
+
+                    ACLMessage cfp = new ACLMessage(ACLMessage.CFP);
+                    for (int j = 0; j < specialistAgent.length; j++) {
+                        cfp.addReceiver(specialistAgent[j]);
+                    }
+                    cfp.setContent(customerInfo.get(0).toUpdateService());
+                    cfp.setConversationId(String.format("Ordering"));
+                    cfp.setReplyWith("cfp" + System.currentTimeMillis());
+                    myAgent.send(cfp);
+                    mt = MessageTemplate.and(MessageTemplate.MatchConversationId("Ordering"),MessageTemplate.MatchInReplyTo(cfp.getReplyWith()));
+                    //System.out.println(cfp);
+                    step = 1;
+                    break;
+
+                case 1:
+                    //Receiving the buying request.
+                    ACLMessage reply = myAgent.receive(mt);
+                    if(reply != null){
+                        //Reply receipt
+                        if(reply.getPerformative() == ACLMessage.AGREE){
+                            System.out.println("The daily order is confirm");
+                        }else{
+                            System.out.println("The daily order is refuse");
+                        }
+                        dayNumOf--;
+                        step = 2;
+                        break;
+                    }
+
+                case 2:
+                    //orderDay Counting.
+                    if(dayNumOf > 0){
+                        step = 0;
+                    }else{
+                        step = 3;
+                    }
+                    break;
+            }
+        }
+        public boolean done(){
+            return (step == 3);
         }
     }
 
