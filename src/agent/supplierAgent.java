@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "med-shifUp15D-smaSpecial-smaSupply-supplierStock";
-    String ingredientReq = "med-shifUp15D-smaSpecial-smaSupply-ingredientReq";
-    String refillStock = "med-shifUp15D-smaSpecial-smaSupply-refillStock";
+    String supplierStock = "test-smaSupply-supplierStock";
+    String ingredientReq = "test-smaSupply-ingredientReq";
+    String refillStock = "test-smaSupply-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -44,9 +44,9 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -59,9 +59,9 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //OSX classpath
-    //String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
-    //String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
+    String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
 
 
     //Request from specialist classpath
@@ -423,6 +423,7 @@ public class supplierAgent extends Agent {
             stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 1).Spread + spreadNeed;
             //adding new row to list.
             refillStockList.add(new weeklyReport(weekCount,breadNeed,hamNeed,0,0,0,spreadNeed));
+            System.out.println("##############################               " + refillStockList.get(refillStockList.size() - 1).toString());
 
             //CSV writing.
             try {
@@ -500,49 +501,34 @@ public class supplierAgent extends Agent {
         return result;
     }
 
-    private double smaOptMethod (int percentage, int windowSize, String ingredName, ArrayList<supplierAgent.weeklyReport> requestFromSpecialist, ArrayList<supplierAgent.weeklyReport> weeklyResult){
+    private double smaOptMethod (int percentage, int windowSize, String ingredName, ArrayList<supplierAgent.weeklyReport> refillStockList, ArrayList<supplierAgent.weeklyReport> weeklyResult){
         double result = 0;
         String tmpText = "";
-
-        for(int j =0 ; j < requestFromSpecialist.size();j++){
-            System.out.println("แสดงผลแต่ละบรรทัดของ weeklyResult" + weeklyResult.get(j).toString());
-        }
         //Checking window size for SMA calculation.
         //We would average base on difference window size when ArrayList size is less than window size value.
-        int arraySize = requestFromSpecialist.size();
-        if(arraySize <= 0){
+
+        //System.out.println(String.format(" RefillStockList size:       %d                 %s",refillStockList.size(), refillStockList.get(refillStockList.size() - 1).toString()));
+        if(refillStockList.size() == 0){
             result = 0;
-        } else if (arraySize < windowSize) {
-            for (int i = 0; i < arraySize; i++){
+            System.out.println("frgthyjukil           " + refillStockList.size());
+        } else if (refillStockList.size() > 0 && refillStockList.size() < windowSize) {
+            System.out.println("less than windowSize           " + refillStockList.size());
+            for (int i = 0; i < refillStockList.size(); i++){
                 switch (ingredName){
                     case "WhiteBread":
                         tmpText = "WhiteBread";
-                        if(requestFromSpecialist.get(i).WhiteBread > 0){
-                            result = result + requestFromSpecialist.get(i).WhiteBread;
-                        }else {
-                         arraySize--;
-                        }
+                        result = refillStockList.get(refillStockList.size() - 1).WhiteBread;
                         break;
                     case "Ham":
                         tmpText = "Ham";
-                        if(requestFromSpecialist.get(i).Ham > 0){
-                            result = result + requestFromSpecialist.get(i).Ham;
-                        }else {
-                            arraySize--;
-                        }
-
+                        result = refillStockList.get(refillStockList.size() - 1).Ham;
                         break;
                     case "Spread":
                         tmpText = "Spread";
-                        if(requestFromSpecialist.get(i).Spread > 0){
-                            result = result + requestFromSpecialist.get(i).Spread;
-                        }else {
-                            arraySize--;
-                        }
+                        result = refillStockList.get(refillStockList.size()).Spread;
                         break;
                 }
             }
-            result = result/arraySize;
             System.out.println(String.format("list size less than window:     %s       %.2f",tmpText, result));
         } else {
             switch (ingredName){
@@ -550,7 +536,7 @@ public class supplierAgent extends Agent {
                     tmpText = "WhiteBread";
                     int breadSize = 0;
                     while (breadSize != windowSize){
-                        result = result + requestFromSpecialist.get(requestFromSpecialist.size() - 1 - breadSize).WhiteBread;
+                        result = result + refillStockList.get(refillStockList.size() - 1 - breadSize).WhiteBread;
                         breadSize++;
                     }
                     result = result/windowSize;
@@ -565,7 +551,7 @@ public class supplierAgent extends Agent {
                     tmpText = "Ham";
                     int hamSize = 0;
                     while (hamSize != windowSize){
-                        result = result + requestFromSpecialist.get(requestFromSpecialist.size() - 1 - hamSize).Ham;
+                        result = result + refillStockList.get(refillStockList.size() - 1 - hamSize).Ham;
                         hamSize++;
                     }
                     result = result/windowSize;
@@ -577,7 +563,7 @@ public class supplierAgent extends Agent {
                     tmpText = "Spread";
                     int spreadSize = 0;
                     while (spreadSize != windowSize){
-                        result = result + requestFromSpecialist.get(requestFromSpecialist.size() - 1 - spreadSize).Spread;
+                        result = result + refillStockList.get(refillStockList.size() - 1 - spreadSize).Spread;
                         spreadSize++;
                     }
                     result = result/windowSize;
