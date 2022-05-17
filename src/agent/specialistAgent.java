@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "med-SpikDown30-10D-std-dailyResult";
-    String weeklyName = "med-SpikDown30-10D-std-weeklyResult";
+    String dailyName = "med-shifUp15D-smaSpecial-smaSupply-dailyResult";
+    String weeklyName = "med-shifUp15D-smaSpecial-smaSupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -54,8 +54,8 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
@@ -66,8 +66,8 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
-    String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
-    String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
+    //String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
+    //String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
 
     String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
@@ -282,20 +282,20 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
-            double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
-            //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
+            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
+            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
             serviceSender.setContent(String.format("WhiteBread-%.2f",breadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
-            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
+            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
+            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
             serviceSender.setContent(String.format("Ham-%.2f",hamNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
-            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
+            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
+            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
             serviceSender.setContent(String.format("Spread-%.2f",spreadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
