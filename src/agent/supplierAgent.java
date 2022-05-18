@@ -404,7 +404,7 @@ public class supplierAgent extends Agent {
         public void action(){
             //Initialize
             int percentage = 0;
-            int windowSize = 0;
+            int windowSize = 2;
             //method 0 is standard and 1 is SMA
 
             //double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
@@ -501,14 +501,14 @@ public class supplierAgent extends Agent {
         return result;
     }
 
-    private double smaOptMethod (int percentage, int windowSize, String ingredName, ArrayList<supplierAgent.weeklyReport> refillStockList, ArrayList<supplierAgent.weeklyReport> weeklyResult){
+    private double smaOptMethod (int percentage, int windowSize, String ingredName, ArrayList<supplierAgent.weeklyReport> refillStockList, ArrayList<supplierAgent.weeklyReport> stockOfIngredients){
         double result = 0;
         String tmpText = "";
         //Checking window size for SMA calculation.
         //We would average base on difference window size when ArrayList size is less than window size value.
 
         //System.out.println(String.format(" RefillStockList size:       %d                 %s",refillStockList.size(), refillStockList.get(refillStockList.size() - 1).toString()));
-        if(refillStockList.size() == 0){
+        if(refillStockList.size() == 0 || windowSize == 0){
             result = 0;
             System.out.println("frgthyjukil           " + refillStockList.size());
         } else if (refillStockList.size() > 0 && refillStockList.size() < windowSize) {
@@ -517,15 +517,18 @@ public class supplierAgent extends Agent {
                 switch (ingredName){
                     case "WhiteBread":
                         tmpText = "WhiteBread";
-                        result = refillStockList.get(refillStockList.size() - 1).WhiteBread;
+                        result = stockOfIngredients.get(stockOfIngredients.size() - 2).WhiteBread - stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread;
                         break;
                     case "Ham":
                         tmpText = "Ham";
-                        result = refillStockList.get(refillStockList.size() - 1).Ham;
+                        //result = refillStockList.get(refillStockList.size() - 1).Ham;
+                        result = stockOfIngredients.get(stockOfIngredients.size() - 2).Ham - stockOfIngredients.get(stockOfIngredients.size() - 1).Ham;
+
                         break;
                     case "Spread":
                         tmpText = "Spread";
-                        result = refillStockList.get(refillStockList.size()).Spread;
+                        //result = refillStockList.get(refillStockList.size()  - 1).Spread;
+                        result = stockOfIngredients.get(stockOfIngredients.size() - 2).Spread - stockOfIngredients.get(stockOfIngredients.size() - 1).Spread;
                         break;
                 }
             }
@@ -555,9 +558,11 @@ public class supplierAgent extends Agent {
                         hamSize++;
                     }
                     result = result/windowSize;
+                    /*
                     if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).Ham){
                         result = 0;
                     }
+                     */
                     break;
                 case "Spread":
                     tmpText = "Spread";
@@ -567,9 +572,11 @@ public class supplierAgent extends Agent {
                         spreadSize++;
                     }
                     result = result/windowSize;
+                    /*
                     if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).WhiteBread){
                         result = 0;
                     }
+                     */
                     break;
                 }
             System.out.println(String.format("SMA windows:     %s       %.2f",tmpText, result));
