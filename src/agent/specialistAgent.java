@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "test-smaSupply-dailyResult";
-    String weeklyName = "test-smaSupply-weeklyResult";
+    String dailyName = "med-shiftDown30-smaOverSpecialist-stdSupply-dailyResult";
+    String weeklyName = "med-shiftDown30-smaOverSpecialist-stdSupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -54,8 +54,8 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
@@ -66,8 +66,8 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
-    String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
-    String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
+    //String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
+    //String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
 
     String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
@@ -257,7 +257,7 @@ public class specialistAgent extends Agent {
     private class nextWeekIngradReq extends OneShotBehaviour{
         private AID[] supplierAgent;
         public void action(){
-            int overEstPct = 0;
+            int overEstPct = 20;
             int windowSize = 2;
 
 

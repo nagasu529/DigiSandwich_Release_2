@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "test-smaSupply-supplierStock";
-    String ingredientReq = "test-smaSupply-ingredientReq";
-    String refillStock = "test-smaSupply-refillStock";
+    String supplierStock = "med-shiftDown30-smaOverSpecialist-stdSupply-supplierStock";
+    String ingredientReq = "med-shiftDown30-smaOverSpecialist-stdSupply-ingredientReq";
+    String refillStock = "med-shiftDown30-smaOverSpecialist-stdSupply-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -44,9 +44,9 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    //String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -59,9 +59,9 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //OSX classpath
-    String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
 
 
     //Request from specialist classpath
@@ -407,14 +407,14 @@ public class supplierAgent extends Agent {
             int windowSize = 2;
             //method 0 is standard and 1 is SMA
 
-            //double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
-            double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
+            double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
+            //double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
 
-            //double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
-            double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
+            double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
+            //double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
 
-            //double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
-            double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
+            double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
+            //double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
 
 
             //refill stock to refrigerator
@@ -543,12 +543,7 @@ public class supplierAgent extends Agent {
                         breadSize++;
                     }
                     result = result/windowSize;
-                    /*
-                    if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).WhiteBread){
-                        result = 0;
-                    }
 
-                     */
                     break;
                 case "Ham":
                     tmpText = "Ham";
@@ -558,11 +553,7 @@ public class supplierAgent extends Agent {
                         hamSize++;
                     }
                     result = result/windowSize;
-                    /*
-                    if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).Ham){
-                        result = 0;
-                    }
-                     */
+
                     break;
                 case "Spread":
                     tmpText = "Spread";
@@ -572,16 +563,12 @@ public class supplierAgent extends Agent {
                         spreadSize++;
                     }
                     result = result/windowSize;
-                    /*
-                    if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).WhiteBread){
-                        result = 0;
-                    }
-                     */
+
                     break;
                 }
             System.out.println(String.format("SMA windows:     %s       %.2f",tmpText, result));
         }
-
+        result = result + (result * percentage/100);
 
         return result;
     }
