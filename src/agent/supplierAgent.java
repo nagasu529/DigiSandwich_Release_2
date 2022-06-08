@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 public class supplierAgent extends Agent {
-
+    supplierGui myGui;
     DecimalFormat df = new DecimalFormat("#.##");
     DatabaseConn app = new DatabaseConn();
     calcMethod calc = new calcMethod();
@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "test-smaSupply-supplierStock";
-    String ingredientReq = "test-smaSupply-ingredientReq";
-    String refillStock = "test-smaSupply-refillStock";
+    String supplierStock = "med-spikeUp30D10-stdOverSpecialist-stdSupply-supplierStock";
+    String ingredientReq = "med-spikeUp30D10-stdOverSpecialist-stdSupply-ingredientReq";
+    String refillStock = "med-spikeUp30D10-stdOverSpecialist-stdSupply-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -97,7 +97,8 @@ public class supplierAgent extends Agent {
         // Create and show the GUI
             //myGui = new supplierUI(this);
             //myGui.showGui();
-
+        myGui = new supplierGui(this);
+        myGui.show();
             // Register the book-selling service in the yellow pages
             DFAgentDescription dfd = new DFAgentDescription();
             dfd.setName(getAID());
@@ -407,14 +408,14 @@ public class supplierAgent extends Agent {
             int windowSize = 2;
             //method 0 is standard and 1 is SMA
 
-            //double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
-            double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
+            double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
+            //double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
 
-            //double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
-            double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
+            double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
+            //double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
 
-            //double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
-            double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
+            double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
+            //double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
 
 
             //refill stock to refrigerator
@@ -423,7 +424,6 @@ public class supplierAgent extends Agent {
             stockOfIngredients.get(stockOfIngredients.size() - 1).Spread = stockOfIngredients.get(stockOfIngredients.size() - 1).Spread + spreadNeed;
             //adding new row to list.
             refillStockList.add(new weeklyReport(weekCount,breadNeed,hamNeed,0,0,0,spreadNeed));
-            System.out.println("##############################               " + refillStockList.get(refillStockList.size() - 1).toString());
 
             //CSV writing.
             try {
@@ -510,9 +510,7 @@ public class supplierAgent extends Agent {
         //System.out.println(String.format(" RefillStockList size:       %d                 %s",refillStockList.size(), refillStockList.get(refillStockList.size() - 1).toString()));
         if(refillStockList.size() == 0 || windowSize == 0){
             result = 0;
-            System.out.println("frgthyjukil           " + refillStockList.size());
         } else if (refillStockList.size() > 0 && refillStockList.size() < windowSize) {
-            System.out.println("less than windowSize           " + refillStockList.size());
             for (int i = 0; i < refillStockList.size(); i++){
                 switch (ingredName){
                     case "WhiteBread":
@@ -532,7 +530,6 @@ public class supplierAgent extends Agent {
                         break;
                 }
             }
-            System.out.println(String.format("list size less than window:     %s       %.2f",tmpText, result));
         } else {
             switch (ingredName){
                 case "WhiteBread":
@@ -543,12 +540,6 @@ public class supplierAgent extends Agent {
                         breadSize++;
                     }
                     result = result/windowSize;
-                    /*
-                    if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).WhiteBread){
-                        result = 0;
-                    }
-
-                     */
                     break;
                 case "Ham":
                     tmpText = "Ham";
@@ -558,11 +549,6 @@ public class supplierAgent extends Agent {
                         hamSize++;
                     }
                     result = result/windowSize;
-                    /*
-                    if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).Ham){
-                        result = 0;
-                    }
-                     */
                     break;
                 case "Spread":
                     tmpText = "Spread";
@@ -572,17 +558,9 @@ public class supplierAgent extends Agent {
                         spreadSize++;
                     }
                     result = result/windowSize;
-                    /*
-                    if((result * 2)  < weeklyResult.get(weeklyResult.size() - 1).WhiteBread){
-                        result = 0;
-                    }
-                     */
                     break;
                 }
-            System.out.println(String.format("SMA windows:     %s       %.2f",tmpText, result));
         }
-
-
         return result;
     }
 

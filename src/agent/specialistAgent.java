@@ -25,7 +25,7 @@ import java.util.*;
 
 
 public class specialistAgent extends Agent {
-    //private biddingSpecialistUI myGui;
+    private specialistGui myGui;
 
     //Initial Data table and others parameters.
 
@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "test-smaSupply-dailyResult";
-    String weeklyName = "test-smaSupply-weeklyResult";
+    String dailyName = "med-spikeUp30D10-stdOverSpecialist-stdSupply-dailyResult";
+    String weeklyName = "med-spikeUp30D10-stdOverSpecialist-stdSupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -112,6 +112,9 @@ public class specialistAgent extends Agent {
         catch (FIPAException fe) {
             fe.printStackTrace();
         }
+
+        myGui = new specialistGui(this);
+        myGui.show();
 
         addBehaviour(new specialistAgent.updateStockFromSupplier());
         addBehaviour(new specialistAgent.receiveOrderFromCustomer());
@@ -195,6 +198,7 @@ public class specialistAgent extends Agent {
                         //writing data in row.
                         try {
                             calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(latestIndex).rowData());
+                            myGui.displayUI("Weekly summary: " + weeklyResult.get(latestIndex).toString());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -214,8 +218,6 @@ public class specialistAgent extends Agent {
                         tempdayOfweek = 0;
                     }
                      */
-
-
                 }else{
                     //Writting the current ingredient stock before environment is terminated.
 
@@ -260,7 +262,6 @@ public class specialistAgent extends Agent {
             int overEstPct = 0;
             int windowSize = 2;
 
-
             //Searching specialist agent and created address table.
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sdSearch = new ServiceDescription();
@@ -282,20 +283,20 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
-            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
-            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
+            double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
+            //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
             serviceSender.setContent(String.format("WhiteBread-%.2f",breadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
-            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
+            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
+            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
             serviceSender.setContent(String.format("Ham-%.2f",hamNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
-            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
+            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
+            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
             serviceSender.setContent(String.format("Spread-%.2f",spreadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
@@ -603,6 +604,7 @@ public class specialistAgent extends Agent {
 
             try {
                 calcMethod.updateCSVFile(dailyResult,dailyTransaction.get(0).rowData());
+                myGui.displayUI("Daily transaction:  " + dailyTransaction.get(0).stringDisplay() + '\n');
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -711,6 +713,10 @@ public class specialistAgent extends Agent {
                     String.valueOf(Onion_after),String.valueOf(Pickle),String.valueOf(this.Pickle_after),String.valueOf(this.Tuna),String.valueOf(this.Tuna_after),
                     String.valueOf(this.Spread),String.valueOf(this.Spread_after)};
             return result;
+        }
+        public String stringDisplay(){
+            String stringOutput = String.format("Accepted order: %d  Rejected order: %d ",this.totalPaticipant,this.numOfAccept,this.numOfReject);
+            return stringOutput;
         }
 
     }
