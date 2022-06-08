@@ -18,10 +18,10 @@ public class DatabaseConn {
     //Database connect for calculationg ET0
     private Connection connect(){
         //SQlite connietion string
-        //String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
+        String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
         //String url = "jdbc:sqlite:C:/Users/kitti/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office PC classpath
         //String url = "jdbc:sqlite:C:/Users/KChiewchanadmin/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office NB classpath
-        String url = "jdbc:sqlite:/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook classpath
+        //String url = "jdbc:sqlite:/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook classpath
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
