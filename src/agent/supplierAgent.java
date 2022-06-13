@@ -155,6 +155,7 @@ public class supplierAgent extends Agent {
         //Writing to initialize stock at first week
         try {
             calc.updateCSVFile(supplierStockClasspath,stockOfIngredients.get(0).rowData());
+            //myGui.displayUI(stockOfIngredients.get(0).toStringDisplay());
         }catch (IOException e){
             e.printStackTrace();
         }
@@ -266,6 +267,7 @@ public class supplierAgent extends Agent {
                     //Writing to stockUpdate for each week to CSV
                     try {
                         calc.updateCSVFile(supplierStockClasspath,stockOfIngredients.get(stockOfIngredients.size() - 1).rowData());
+                        myGui.displayUI(stockOfIngredients.get(stockOfIngredients.size() - 1).toStringDisplay());
                     }catch (IOException e){
                         e.printStackTrace();
                     }
@@ -620,6 +622,11 @@ public class supplierAgent extends Agent {
             String[] result = {String.valueOf(this.Week),String.valueOf(this.WhiteBread),String.valueOf(this.Ham),String.valueOf(this.Onion),
                     String.valueOf(this.Pickle),String.valueOf(this.Tuna),String.valueOf(this.Spread)};
             return result;
+        }
+        public String toStringDisplay(){
+            String weeklyDisply = String.format("Current stock (Weekly): \n" +
+                    "Whitebread : %.2f  Ham: %.2f  Spread: %.2f \n",this.WhiteBread,this.Ham, this.Spread);
+            return weeklyDisply;
         }
     }
 }

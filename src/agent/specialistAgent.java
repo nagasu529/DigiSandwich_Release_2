@@ -198,7 +198,7 @@ public class specialistAgent extends Agent {
                         //writing data in row.
                         try {
                             calcMethod.updateCSVFile(weeklyResultPath,weeklyResult.get(latestIndex).rowData());
-                            myGui.displayUI("Weekly summary: " + weeklyResult.get(latestIndex).toString());
+                            myGui.displayUI("Weekly summary: " + weeklyResult.get(latestIndex).toStringDisplay());
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
@@ -715,7 +715,7 @@ public class specialistAgent extends Agent {
             return result;
         }
         public String stringDisplay(){
-            String stringOutput = String.format("Accepted order: %d  Rejected order: %d ",this.totalPaticipant,this.numOfAccept,this.numOfReject);
+            String stringOutput = String.format("Accepted order: %d  Rejected order: %d ",this.numOfAccept,this.numOfReject);
             return stringOutput;
         }
 
@@ -759,6 +759,13 @@ public class specialistAgent extends Agent {
         public String toUpdateService(String ingradName){
             String message = String.format("%s-");
             return  message;
+        }
+        public String toStringDisplay(){
+            String weeklyString = String.format("Weekly result: \n" +
+                    "Whitebread (current): %.2f  Whitebread (weekly requirement): %.2f \n" +
+                    "Ham (current): %.2f  Ham (weekly requirement): %.2f \n" +
+                    "Spread (current): %.2f Spread (weekly requirement): %.2f \n",this.WhiteBread,this.WhiteBreadNeed,this.Ham,this.HamNeed,this.Spread,this.SpreadNeed);
+            return  weeklyString;
         }
     }
 

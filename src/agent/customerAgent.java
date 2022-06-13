@@ -101,6 +101,7 @@ public class customerAgent extends Agent {
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
+                myGui.displayUI(String.format("Daily order request: %d \n", customerInfo.get(0).numOfOrder));
 
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
                 if(timePeriod % 7 == 0){
