@@ -681,6 +681,29 @@ public class specialistAgent extends Agent {
         return result;
     }
 
+    private double chartistOpt (int percentage, int currentWeekOrder, int lastWeekOrder){
+        double chartistResult = 0;
+        double calculationResult = (currentWeekOrder + (currentWeekOrder - lastWeekOrder));
+        chartistResult = calculationResult + ((calculationResult * percentage)/100);
+
+        return chartistResult;
+    }
+
+    private double smayOpt (int percentage, int currentweekOrder, int nextWeekLastYear){
+        double smayOptResult;
+        double tmpCalc = (currentweekOrder + nextWeekLastYear)/2;
+        smayOptResult = tmpCalc + ((tmpCalc * percentage)/100);
+        return smayOptResult;
+    }
+
+    private double smayTwoOpt(int percentage, int currentWeekOrder, int lastWeekOrder, int lastWeekLastYear, int nextWeekLastYear){
+        double smayTwoOpt;
+        double tmpCalc = 0.5 * (lastWeekLastYear + (lastWeekOrder/lastWeekLastYear)) * nextWeekLastYear;
+        smayTwoOpt = tmpCalc + ((tmpCalc * percentage)/100);
+
+        return smayTwoOpt;
+    }
+
     private class ingredientTransaction{
         public int totalPaticipant, numOfOrder,numOfAccept, numOfReject;
         public double WhiteBread, WhiteBread_after, Ham, Ham_after, Onion, Onion_after,Pickle, Pickle_after, Tuna, Tuna_after, Spread, Spread_after;

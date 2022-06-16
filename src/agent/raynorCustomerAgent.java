@@ -31,7 +31,8 @@ public class raynorCustomerAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
     DecimalFormat df = new DecimalFormat("#.##");
 
-    String inputClasspath = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\HamSW90D.csv";
+    String currentYearInputStr = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/EggMayo2020.csv";
+    String lastYearInputStr = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/EggMayo2019.csv";
 
     //Initialize customer information.
     int numOfOrder = 0;
@@ -52,13 +53,14 @@ public class raynorCustomerAgent extends Agent {
     protected void setup() {
         //CSV reader
 
-        // arraylist to store strings
-        List<String> listOfInput = new ArrayList<String>();
+        //2020
+        // arraylist to store strings for 2020 data.
+        List<String> currentYearInput = new ArrayList<String>();
 
         // load content of file based on specific delimiter
         Scanner sc = null;
         try {
-            sc = new Scanner(new FileReader(inputClasspath)).useDelimiter(",\\s*");
+            sc = new Scanner(new FileReader(currentYearInputStr)).useDelimiter(",\\s*");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -68,18 +70,47 @@ public class raynorCustomerAgent extends Agent {
         while (sc.hasNext()) {
             str = sc.next();
             // adding each string to arraylist
-            listOfInput.add(str);
+            currentYearInput.add(str);
         }
 
         // convert any arraylist to array
-        String[] array = listOfInput.toArray(new String[0]);
+        String[] array = currentYearInput.toArray(new String[0]);
 
         // print each string in array
         for (String eachString : array) {
             System.out.println(eachString);
         }
         //Number day input.
-        int numData = listOfInput.size();
+        int numData = currentYearInput.size();
+
+        //2019
+        // arraylist to store strings for 2020 data.
+        List<String> lastYearInput = new ArrayList<String>();
+
+        try {
+            sc = new Scanner(new FileReader(lastYearInputStr)).useDelimiter(",\\s*");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        String strLastYear;
+
+        // checking end of file
+        while (sc.hasNext()) {
+            strLastYear = sc.next();
+            // adding each string to arraylist
+            lastYearInput.add(strLastYear);
+        }
+
+        // convert any arraylist to array
+        String[] arrayLastYear = lastYearInput.toArray(new String[0]);
+
+        // print each string in array
+        for (String eachString : arrayLastYear) {
+            System.out.println(eachString);
+        }
+        //Number day input.
+        int numDataLastYear = lastYearInput.size();
+
 
         //Initialize
         //customerInfo.add(getLocalName(),"HamSandwich","general",100,app.selectProductPrice("HamSandwich","general"),0,0,0);
@@ -126,7 +157,7 @@ public class raynorCustomerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 if (timePeriod < numData){
-                    numOfOrder = Integer.parseInt(listOfInput.get(timePeriod));
+                    numOfOrder = Integer.parseInt(currentYearInput.get(timePeriod));
                     timePeriod++;
                 }else {
                     numOfOrder = 0;
