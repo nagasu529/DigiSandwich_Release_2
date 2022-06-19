@@ -31,8 +31,13 @@ public class raynorCustomerAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
     DecimalFormat df = new DecimalFormat("#.##");
 
-    String currentYearInputStr = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/EggMayo2020.csv";
-    String lastYearInputStr = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/EggMayo2019.csv";
+    //OSX Classpath
+    //String currentYearInputStr = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/EggMayo2020.csv";
+    //String lastYearInputStr = "/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/EggMayo2019.csv";
+
+    //Home PC Classpath
+    String currentYearInputStr = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\EggMayo2020.csv";
+    //String lastYearInputStr = "C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\EggMayo2019.csv";
 
     //Initialize customer information.
     int numOfOrder = 0;
@@ -83,6 +88,7 @@ public class raynorCustomerAgent extends Agent {
         //Number day input.
         int numData = currentYearInput.size();
 
+        /*
         //2019
         // arraylist to store strings for 2020 data.
         List<String> lastYearInput = new ArrayList<String>();
@@ -110,7 +116,7 @@ public class raynorCustomerAgent extends Agent {
         }
         //Number day input.
         int numDataLastYear = lastYearInput.size();
-
+        */
 
         //Initialize
         //customerInfo.add(getLocalName(),"HamSandwich","general",100,app.selectProductPrice("HamSandwich","general"),0,0,0);

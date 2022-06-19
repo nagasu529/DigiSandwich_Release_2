@@ -18,10 +18,10 @@ public class DatabaseConn {
     //Database connect for calculationg ET0
     private Connection connect(){
         //SQlite connietion string
-        //String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
+        String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
         //String url = "jdbc:sqlite:C:/Users/kitti/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office PC classpath
         //String url = "jdbc:sqlite:C:/Users/KChiewchanadmin/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office NB classpath
-        String url = "jdbc:sqlite:/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook classpath
+        //String url = "jdbc:sqlite:/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook classpath
         Connection conn = null;
         try {
             conn = DriverManager.getConnection(url);
@@ -35,6 +35,26 @@ public class DatabaseConn {
      * Select data from ET0 Cable
      *
      */
+    public int selecHistWeekly (int year, int week, String productID){
+        String sql = String.format("SELECT %s FROM OrderHist%s WHERE Week ==%d",productID,year,week);
+        int tempResult = 0;
+        try {
+            Connection conn = this.connect();
+            Statement statement = conn.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
+            while (resultSet.next()) {
+                tempResult = resultSet.getInt(productID);
+            }
+        }catch (SQLException e) {
+            // TODO: handle exception
+            System.err.format("SQL State: %s \n%s", e.getSQLState(), e.getMessage());
+        }catch (Exception e) {
+            // TODO: handle exception
+            e.printStackTrace();
+        }
+        return tempResult;
+    }
+
     public ArrayList<String> selectProduct(String productName) {
         ArrayList<String> quelyResult = new ArrayList<>();
         String sql  = String.format("SELECT * FROM Product WHERE Name='%s'",productName);

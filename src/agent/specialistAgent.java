@@ -54,8 +54,8 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
@@ -66,8 +66,8 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
-    String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
-    String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
+    //String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
+    //String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
 
     String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
@@ -218,6 +218,8 @@ public class specialistAgent extends Agent {
                         tempdayOfweek = 0;
                     }
                      */
+
+
                 }else{
                     //Writting the current ingredient stock before environment is terminated.
 
@@ -259,9 +261,6 @@ public class specialistAgent extends Agent {
     private class nextWeekIngradReq extends OneShotBehaviour{
         private AID[] supplierAgent;
         public void action(){
-            int overEstPct = 0;
-            int windowSize = 2;
-
             //Searching specialist agent and created address table.
             DFAgentDescription template = new DFAgentDescription();
             ServiceDescription sdSearch = new ServiceDescription();
@@ -283,85 +282,35 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
+            int overEstPct = 0;
+            int windowSize = 2;
+
+            //Standard Optimization
             double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
+            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
+            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
+
+            //SMA
             //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
+            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
+            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
+
+            //Chartist
+            //double breadNeed = chartistOpt(overEstPct,"WhiteBread",weeklyResult);
+
+
             serviceSender.setContent(String.format("WhiteBread-%.2f",breadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
-            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
             serviceSender.setContent(String.format("Ham-%.2f",hamNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
-            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
             serviceSender.setContent(String.format("Spread-%.2f",spreadNeed));
             serviceSender.setConversationId("Supplier");
             myAgent.send(serviceSender);
 
-            /*
-            //Weekly ingredients need calculation.
-            double breadNeed = weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
-            double hamNeed = weeklyResult.get(weeklyResult.size() - 1).HamNeed;
-            double spreadNeed = weeklyResult.get(weeklyResult.size() - 1).SpreadNeed;
-
-            if(weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
-                breadNeed = breadNeed - dailyTransaction.get(0).WhiteBread_after;
-                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
-                serviceSender.setConversationId("Supplier");
-                myAgent.send(serviceSender);
-            }
-
-            int totalWeekly = weeklyResult.get(weeklyResult.size() - 1).numOfOrder;
-            ArrayList<String> queryResult = app.selectProduct("HamSandwich");
-            for(int i = 0; i < queryResult.size();i++) {
-                if (queryResult.get(i) != null) {
-                    double numPerOneProduct = app.selectQuantity("HamSandwich", queryResult.get(i));
-                    switch (queryResult.get(i)) {
-                        case "WhiteBread":
-                            breadNeed = (numPerOneProduct * totalWeekly);
-                            //weeklyResult.get(weeklyResult.size() - 1).WhiteBreadNeed;
-                            if(breadNeed - dailyTransaction.get(0).WhiteBread_after > 0){
-                                breadNeed = breadNeed - dailyTransaction.get(0).WhiteBread_after;
-                                serviceSender.setContent("WhiteBread" + "-" + breadNeed);
-                                serviceSender.setConversationId("Supplier");
-                                myAgent.send(serviceSender);
-                                //System.out.println(serviceSender);
-                            }else {
-                                breadNeed = 0;
-                            }
-                            break;
-                        case "Ham":
-                            hamNeed = (numPerOneProduct * totalWeekly);
-                            if(hamNeed - dailyTransaction.get(0).Ham_after > 0){
-                                hamNeed = hamNeed - dailyTransaction.get(0).Ham_after;
-                                serviceSender.setContent("Ham" + "-" + hamNeed);
-                                serviceSender.setConversationId("Supplier");
-                                myAgent.send(serviceSender);
-                                //System.out.println(serviceSender);
-
-                            }else {
-                                hamNeed = 0;
-                            }
-                            break;
-                        case "Spread":
-                            spreadNeed = (numPerOneProduct * totalWeekly);
-                            if(spreadNeed - dailyTransaction.get(0).Spread_after > 0){
-                                spreadNeed = spreadNeed - dailyTransaction.get(0).Spread_after;
-                                serviceSender.setContent("Spread" + "-" + spreadNeed);
-                                serviceSender.setConversationId("Supplier");
-                                myAgent.send(serviceSender);
-                                //System.out.println(serviceSender);
-                            }else {
-                                spreadNeed = 0;
-                            }
-                            break;
-                    }
-                }
-            }
-             */
         }
     }
 
@@ -681,10 +630,60 @@ public class specialistAgent extends Agent {
         return result;
     }
 
-    private double chartistOpt (int percentage, int currentWeekOrder, int lastWeekOrder){
+    private double chartistOpt (int percentage, String ingradName, ArrayList<weeklyResult> weeklyResult){
         double chartistResult = 0;
-        double calculationResult = (currentWeekOrder + (currentWeekOrder - lastWeekOrder));
-        chartistResult = calculationResult + ((calculationResult * percentage)/100);
+
+        if(weeklyResult.size() > 2){
+            switch (ingradName){
+                case "WhiteBread":
+                    double currentWeekBread = weeklyResult.get(weeklyResult.size() -1).WhiteBreadNeed;
+                    double lastWeekBread = weeklyResult.get(weeklyResult.size() - 2).WhiteBreadNeed;
+                    double calculationResult = (currentWeekBread + (currentWeekBread - lastWeekBread));
+                    double tmpResult = calculationResult + ((calculationResult * percentage)/100);
+                    double breadNeed = ((app.selectQuantity("HamSandwich", "WhiteBread")) * tmpResult);
+                    chartistResult = breadNeed;
+                    break;
+                case "Ham":
+                    double currentWeekHam = weeklyResult.get(weeklyResult.size() -1).HamNeed;
+                    double lastWeekHam = weeklyResult.get(weeklyResult.size() - 2).HamNeed;
+                    double hamCalculationResult = (currentWeekHam + (currentWeekHam - lastWeekHam));
+                    double tmpHamResult = hamCalculationResult + ((hamCalculationResult * percentage)/100);
+                    double hamNeed = ((app.selectQuantity("HamSandwich", "Ham")) * tmpHamResult);
+                    chartistResult = hamNeed;
+                    break;
+                case "Spread":
+                    double currentWeekSpread = weeklyResult.get(weeklyResult.size() -1).HamNeed;
+                    double lastWeekSpread = weeklyResult.get(weeklyResult.size() - 2).HamNeed;
+                    double spreadCalculationResult = (currentWeekSpread + (currentWeekSpread - lastWeekSpread));
+                    double tmpSpreadResult = spreadCalculationResult + ((spreadCalculationResult * percentage)/100);
+                    double spreadNeed = ((app.selectQuantity("HamSandwich", "Spread")) * tmpSpreadResult);
+                    chartistResult = spreadNeed;
+                    break;
+            }
+        }else {
+            int totalWeekly = 0;
+            if(weeklyResult.size() > 1){
+                totalWeekly = weeklyResult.get(weeklyResult.size() - 2).numOfOrder;
+            }else{
+                totalWeekly = weeklyResult.get(weeklyResult.size() - 1).numOfOrder;
+            }
+            //int totalWeekly = weeklyResult.get(weeklyResult.size() - 1).numOfOrder;
+            int totalReq = totalWeekly + ((totalWeekly * percentage)/100);
+            switch (ingradName){
+                case "WhiteBread":
+                    double breadNeed = ((app.selectQuantity("HamSandwich", "WhiteBread")) * totalReq);
+                    chartistResult = breadNeed;
+                    break;
+                case "Ham":
+                    double hamNeed = ((app.selectQuantity("HamSandwich", "Ham")) * totalReq);
+                    chartistResult = hamNeed;
+                    break;
+                case "Spread":
+                    double spreadNeed = ((app.selectQuantity("HamSandwich", "Spread")) * totalReq);
+                    chartistResult = spreadNeed;
+                    break;
+            }
+        }
 
         return chartistResult;
     }

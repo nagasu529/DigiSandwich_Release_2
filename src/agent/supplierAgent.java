@@ -44,9 +44,9 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    //String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -59,9 +59,9 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //OSX classpath
-    String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",refillStock);
 
 
     //Request from specialist classpath
@@ -408,17 +408,16 @@ public class supplierAgent extends Agent {
             //Initialize
             int percentage = 0;
             int windowSize = 2;
-            //method 0 is standard and 1 is SMA
 
+            //Standard Optimization
             double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
-            //double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
-
             double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
-            //double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
-
             double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
-            //double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
 
+            //SMA optimization
+            //double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
+            //double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
+            //double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
 
             //refill stock to refrigerator
             stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread + breadNeed;
