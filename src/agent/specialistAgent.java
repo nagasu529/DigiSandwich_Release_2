@@ -38,9 +38,9 @@ public class specialistAgent extends Agent {
     calcMethod calcMethod = new calcMethod();
     DatabaseConn app = new DatabaseConn();
 
-    //Initialize value befor calculation
-    String dailyName = "med-spikeUp30D10-stdOverSpecialist-stdSupply-dailyResult";
-    String weeklyName = "med-spikeUp30D10-stdOverSpecialist-stdSupply-weeklyResult";
+    //Initialize value before calculation
+    String dailyName = "med-spikeDown30D10-SMASpecialist-stdSupply-dailyResult";
+    String weeklyName = "med-spikeDown30D10-SMASpecialist-stdSupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -54,8 +54,8 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
@@ -66,8 +66,8 @@ public class specialistAgent extends Agent {
     //String weeklyResultPath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //OSX classpath.
-    //String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
-    //String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
+    String dailyResult =String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",dailyName);
+    String weeklyResultPath = String.format("/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/output/%s.csv",weeklyName);
 
     String[] entry = {"totalPaticipant", "totalOrder", "totalOrderAccept","totalOrderReject", "WB", "WB_after", "Ham", "Ham_after", "Onion", "Onion_after", "Pickle", "Pickle_after", "Tuna", "Tuna_after", "Spread", "Spread_after"};
 
@@ -286,14 +286,14 @@ public class specialistAgent extends Agent {
             int windowSize = 2;
 
             //Standard Optimization
-            double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
-            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
-            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
+            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
+            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
+            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
 
             //SMA
-            //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
-            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
-            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
+            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
+            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
+            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
 
             //Chartist
             //double breadNeed = chartistOpt(overEstPct,"WhiteBread",weeklyResult);

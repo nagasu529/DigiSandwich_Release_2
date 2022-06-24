@@ -96,7 +96,7 @@ public class customerAgent extends Agent {
 
                 initialOrder = customerInfo.get(0).numOfOrder;
                 if(weekCount > 1 && spikePeriod > 0){
-                    customerInfo.get(0).numOfOrder = spikePeriod(1,numOfOrder,30);
+                    customerInfo.get(0).numOfOrder = spikePeriod(2,numOfOrder,30);
                     spikePeriod--;
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
