@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "med-spikeUp30D10-stdOverSpecialist-stdSupply-dailyResult";
-    String weeklyName = "med-spikeUp30D10-stdOverSpecialist-stdSupply-weeklyResult";
+    String dailyName = "med-Steady-overSMA10Specialist-stdSupply-dailyResult";
+    String weeklyName = "med-Steady-overSMA10Specialist-stdSupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -282,18 +282,18 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
-            int overEstPct = 0;
+            int overEstPct = 10;
             int windowSize = 2;
 
             //Standard Optimization
-            double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
-            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
-            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
+            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
+            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
+            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
 
             //SMA
-            //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
-            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
-            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
+            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
+            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
+            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
 
             //Chartist
             //double breadNeed = chartistOpt(overEstPct,"WhiteBread",weeklyResult);

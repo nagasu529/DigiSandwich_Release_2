@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "med-spikeUp30D10-stdOverSpecialist-stdSupply-supplierStock";
-    String ingredientReq = "med-spikeUp30D10-stdOverSpecialist-stdSupply-ingredientReq";
-    String refillStock = "med-spikeUp30D10-stdOverSpecialist-stdSupply-refillStock";
+    String supplierStock = "med-Steady-overSMA10Specialist-stdSupply-supplierStock";
+    String ingredientReq = "med-Steady-overSMA10Specialist-stdSupply-ingredientReq";
+    String refillStock = "med-Steady-overSMA10Specialist-stdSupply-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -453,10 +453,12 @@ public class supplierAgent extends Agent {
 
     //Order prediction method that is applied for all agent types.
     private double standardOptMethod (int percentage, String ingredName, ArrayList<supplierAgent.weeklyReport> weeklyResult){
+
         double result = 0;
         int historyRecord = weeklyResult.size();
-        if(historyRecord <= 1){
-            result = 0;
+        System.out.println("weekly result size:      " + historyRecord);
+        if(historyRecord == 1){
+           result = 0;
         }else {
             switch (ingredName){
                 case "WhiteBread":
