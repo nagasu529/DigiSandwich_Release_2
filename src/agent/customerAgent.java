@@ -93,7 +93,7 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-                /*
+                
                 initialOrder = customerInfo.get(0).numOfOrder;
                 if(weekCount > 1 && spikePeriod > 0){
                     customerInfo.get(0).numOfOrder = spikePeriod(2,numOfOrder,30);
@@ -101,7 +101,7 @@ public class customerAgent extends Agent {
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
-                */
+                
 
                 myGui.displayUI(String.format("Daily order request: %d \n", customerInfo.get(0).numOfOrder));
 

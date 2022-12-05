@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "med-Steady-overSMA10Specialist-stdSupply-dailyResult";
-    String weeklyName = "med-Steady-overSMA10Specialist-stdSupply-weeklyResult";
+    String dailyName = "med-SpikeDown-over20Normal-SMASupply-dailyResult";
+    String weeklyName = "med-SpikeDown-over20Normal-SMASupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -54,8 +54,13 @@ public class specialistAgent extends Agent {
 
     //Create CSV classpath.
     //Home PC classpath.
-    String dailyResult = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    //IntelliJ
+    //String dailyResult = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+
+    //VSCode
+    String dailyResult = String.format("C:\\Users\\NaGaSu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\NaGaSu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName); 
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);

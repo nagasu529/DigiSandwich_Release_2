@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "med-Steady-overSMA10Specialist-stdSupply-supplierStock";
-    String ingredientReq = "med-Steady-overSMA10Specialist-stdSupply-ingredientReq";
-    String refillStock = "med-Steady-overSMA10Specialist-stdSupply-refillStock";
+    String supplierStock = "med-SpikeDown-over20Normal-SMASupply-supplierStock";
+    String ingredientReq = "med-SpikeDown-over20Normal-SMASupply-ingredientReq";
+    String refillStock = "med-SpikeDown-over20Normal-SMASupply-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -44,9 +44,15 @@ public class supplierAgent extends Agent {
     //public supplierUI myGui;
 
     //Home PC classpath
-    String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    //IntelliJ
+    //String supplierStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("C:\\Users\\Krist\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+
+    //VSCode
+    String supplierStockClasspath = String.format("C:\\Users\\NaGasu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\NaGasu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\NaGasu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -410,14 +416,14 @@ public class supplierAgent extends Agent {
             int windowSize = 2;
 
             //Standard Optimization
-            double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
-            double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
-            double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
+            //double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
+            //double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
+            //double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
 
             //SMA optimization
-            //double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
-            //double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
-            //double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
+            double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
+            double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
+            double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
 
             //refill stock to refrigerator
             stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread + breadNeed;
