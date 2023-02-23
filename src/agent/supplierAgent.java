@@ -34,9 +34,9 @@ public class supplierAgent extends Agent {
 
     double maxStockCapacity = 1000000;
 
-    String supplierStock = "med-SpikeDown-over20Normal-SMASupply-supplierStock";
-    String ingredientReq = "med-SpikeDown-over20Normal-SMASupply-ingredientReq";
-    String refillStock = "med-SpikeDown-over20Normal-SMASupply-refillStock";
+    String supplierStock = "med-random-Over20SMASP-NormSupply-supplierStock";
+    String ingredientReq = "med-random-Over20SMASP-NormSupply-ingredientReq";
+    String refillStock = "med-random-Over20SMASP-NormSupply-refillStock";
 
     //int[] orderTimerArray = {40000,70000};
 
@@ -416,14 +416,14 @@ public class supplierAgent extends Agent {
             int windowSize = 2;
 
             //Standard Optimization
-            //double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
-            //double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
-            //double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
+            double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
+            double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
+            double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
 
             //SMA optimization
-            double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
-            double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
-            double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
+            //double breadNeed = smaOptMethod(percentage,windowSize,"WhiteBread",refillStockList,stockOfIngredients);
+            //double hamNeed = smaOptMethod(percentage,windowSize,"Ham",refillStockList,stockOfIngredients);
+            //double spreadNeed = smaOptMethod(percentage,windowSize,"Spread",refillStockList,stockOfIngredients);
 
             //refill stock to refrigerator
             stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread = stockOfIngredients.get(stockOfIngredients.size() - 1).WhiteBread + breadNeed;

@@ -39,8 +39,8 @@ public class specialistAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
 
     //Initialize value befor calculation
-    String dailyName = "med-SpikeDown-over20Normal-SMASupply-dailyResult";
-    String weeklyName = "med-SpikeDown-over20Normal-SMASupply-weeklyResult";
+    String dailyName = "med-random-Over20SMASP-NormSupply-dailyResult";
+    String weeklyName = "med-random-Over20SMASP-NormSupply-weeklyResult";
 
     //Initial order value stage.
     double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
@@ -287,7 +287,7 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
-            int overEstPct = 10;
+            int overEstPct = 20;
             int windowSize = 2;
 
             //Standard Optimization

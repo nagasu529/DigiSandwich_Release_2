@@ -19,6 +19,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class customerAgent extends Agent {
     customerGui myGui;
@@ -39,7 +40,7 @@ public class customerAgent extends Agent {
     int weekCount = 1;
     int initialOrder = 0;
 
-    int spikePeriod = 15;        //num of day for spike order.
+    int spikePeriod = 100;        //num of day for spike order.
 
     //int[] orderTimerArray = {20000,60000,180000,300000,4200000};
 
@@ -94,15 +95,20 @@ public class customerAgent extends Agent {
             protected void onTick() {
                 timePeriod++;
                 
+                //Adding the order behaviour (steady, increasing and decreasing)
+                customerInfo.get(0).numOfOrder = spikePeriod(9,numOfOrder,30);
+
+                //previous version
+                /*
                 initialOrder = customerInfo.get(0).numOfOrder;
                 if(weekCount > 1 && spikePeriod > 0){
-                    customerInfo.get(0).numOfOrder = spikePeriod(2,numOfOrder,30);
+                    customerInfo.get(0).numOfOrder = spikePeriod(0,numOfOrder,30);
                     spikePeriod--;
                 }else {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
+                 */
                 
-
                 myGui.displayUI(String.format("Daily order request: %d \n", customerInfo.get(0).numOfOrder));
 
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
@@ -340,6 +346,14 @@ public class customerAgent extends Agent {
 
     private int spikePeriod(int spikeStatus, int initialOrder, int spikeOrder){
         int unitResult = 0;
+        if(spikeStatus == 9){
+             //Randomize the order request status based on new SpikeStatus
+             Random rand = new Random();
+             //spikeOrder = 0;
+             spikeOrder = rand.nextInt((spikeOrder - 10), spikeOrder);
+             spikeStatus = rand.nextInt(0, 3);   //reset Spike status and random new status.
+        }
+
         switch (spikeStatus){
             case 1:
                 System.out.println("Spike start (Upper)");
@@ -349,6 +363,7 @@ public class customerAgent extends Agent {
                 System.out.println("Spike start (Lower)");
                 unitResult = initialOrder - spikeOrder;
                 break;
+            case 9:
             default:
                 System.out.println("None spike");
                 unitResult = initialOrder;
