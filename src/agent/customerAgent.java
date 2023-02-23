@@ -30,15 +30,15 @@ public class customerAgent extends Agent {
     DecimalFormat df = new DecimalFormat("#.##");
 
     //Initialize customer information.
-    int numOfOrder = 100;
     int shiftUnit = 0;
     int shiftStatus = 0;        //(shiftStatus,shiftUnit)  =  (0,0) is stable, (0,x) shift up and others shift down.
 
+    int numOfOrder = 100;
+    int initialOrder = 0;
     int dayNumOf = 65;
     int dayTimer = 15000;
     int timePeriod = 0;
     int weekCount = 1;
-    int initialOrder = 0;
 
     int spikePeriod = 100;        //num of day for spike order.
 
@@ -94,7 +94,7 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-                
+    
                 //Adding the order behaviour (steady, increasing and decreasing)
                 customerInfo.get(0).numOfOrder = spikePeriod(9,numOfOrder,30);
 
@@ -349,8 +349,8 @@ public class customerAgent extends Agent {
         if(spikeStatus == 9){
              //Randomize the order request status based on new SpikeStatus
              Random rand = new Random();
-             //spikeOrder = 0;
-             spikeOrder = rand.nextInt((spikeOrder - 10), spikeOrder);
+             spikeOrder = rand.nextInt(0, spikeOrder);
+             System.out.println("test spike . random =  " + spikeOrder);
              spikeStatus = rand.nextInt(0, 3);   //reset Spike status and random new status.
         }
 
@@ -363,7 +363,6 @@ public class customerAgent extends Agent {
                 System.out.println("Spike start (Lower)");
                 unitResult = initialOrder - spikeOrder;
                 break;
-            case 9:
             default:
                 System.out.println("None spike");
                 unitResult = initialOrder;
