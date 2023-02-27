@@ -18,12 +18,12 @@ public class DatabaseConn {
     //Database connect for calculationg ET0
     private Connection connect(){
         //SQlite connietion string (IntelliJ)
-        //String url = "jdbc:sqlite:C:/Users/Krist/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
+        String url = "jdbc:sqlite:C:/Users/NaGaSu/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
         //String url = "jdbc:sqlite:C:/Users/HP0000/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office PC classpath
         //String url = "jdbc:sqlite:/Users/nagasu/IdeaProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook classpath
 
         //SQlite connietion string (VSCode)
-        String url = "jdbc:sqlite:C:/Users/NaGaSu/VScodeProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
+        //String url = "jdbc:sqlite:C:/Users/NaGaSu/VScodeProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //My PC classpath
         //String url = "jdbc:sqlite:C:/Users/HP0000/VScodeProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //Office PC classpath
         //String url = "jdbc:sqlite:/Users/nagasu/VScodeProjects/DigiSandwich_Release_2/src/database/DynamicMatchingDB.sqlite"; //MacBook classpath
 

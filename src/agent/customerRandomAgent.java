@@ -29,6 +29,8 @@ public class customerRandomAgent extends Agent {
     DatabaseConn app = new DatabaseConn();
     DecimalFormat df = new DecimalFormat("#.##");
 
+    calcMethod calcMethod = new calcMethod();
+
     //Initialize customer information.
     int shiftUnit = 0;
     int shiftStatus = 0;        //(shiftStatus,shiftUnit)  =  (0,0) is stable, (0,x) shift up and others shift down.
@@ -94,7 +96,20 @@ public class customerRandomAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-    
+
+                //Adding the ordering by customer that are mixed from steady, shift up, shift down and spike.
+                int testCaseScenario = calcMethod.getRandIntRange(1,4);
+
+                switch (testCaseScenario){
+                    case 1:
+                        //spike up
+                        customerInfo.get(0).numOfOrder = dialyOrderStatus(1,numOfOrder,30);
+                        spikePeriod = 10;
+                }
+
+
+                /*
+
                 //Adding the order behaviour (steady, increasing and decreasing)
                 customerInfo.get(0).numOfOrder = dialyOrderStatus(9,numOfOrder,30);
 
