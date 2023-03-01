@@ -96,44 +96,27 @@ public class customerRandomAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-
-                //Adding the ordering by customer that are mixed from steady, shift up, shift down and spike.
-                int testCaseScenario = calcMethod.getRandIntRange(1,4);
-
-                switch (testCaseScenario){
-                    case 1:
-                        //spike up
-                        customerInfo.get(0).numOfOrder = dialyOrderStatus(1,numOfOrder,30);
-                        spikePeriod = 10;
-                }
-
-
-                /*
-
-                //Adding the order behaviour (steady, increasing and decreasing)
-                customerInfo.get(0).numOfOrder = dialyOrderStatus(9,numOfOrder,30);
-
-                //previous version
-                /*
-                initialOrder = customerInfo.get(0).numOfOrder;
-                if(weekCount > 1 && spikePeriod > 0){
-                    customerInfo.get(0).numOfOrder = spikePeriod(0,numOfOrder,30);
-                    spikePeriod--;
-                }else {
-                    customerInfo.get(0).numOfOrder = numOfOrder;
-                }
-                 */
                 
-                myGui.displayUI(String.format("Daily order request: %d \n", customerInfo.get(0).numOfOrder));
+                myGui.displayUI(String.format("Daily order days (%d)  request: %d \n", timePeriod,customerInfo.get(0).numOfOrder));
 
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
                 if(timePeriod % 7 == 0){
-                    //initialOrder = customerInfo.get(0).numOfOrder;
                     weekCount++;
-                    //System.out.println("weekly " + weekCount);
-                    //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);
-                    //initOrder = customerInfo.get(0).numOfOrder;
-                    //timePeriod = 0;
+
+                    //Adding the ordering by customer that are mixed from steady, shift up, shift down.
+                    int testCaseScenario = calcMethod.getRandIntRange(1,3);
+                    switch (testCaseScenario) {
+                        case 1:
+                            myGui.displayUI((String.format("Week %d  the order behaviour is changed to Increasing order", weekCount)));
+                            break;
+                        case 2:
+                            myGui.displayUI(String.format("Week %d  the order behaviour is changed to Decreasing order", weekCount));
+                            break;
+                        case 3:
+                            myGui.displayUI(String.format("Week %d  the order behaviour is back to steady stage",weekCount));
+                            break;
+
+                    }
                 }
                 addBehaviour(new customerRandomAgent.RequestPerformer());
             }
@@ -359,31 +342,26 @@ public class customerRandomAgent extends Agent {
         return unitPerWeek;
     }
 
-    private int dialyOrderStatus(int status, int initialOrder, int spikeOrder){
+    private int orderTransactionScenario(int spikeStatus){
         int unitResult = 0;
-        if(status == 9){
-             //Randomize the order request status based on new SpikeStatus
-             Random rand = new Random();
-             spikeOrder = rand.nextInt(0, spikeOrder);
-             System.out.println("test spike . random =  " + spikeOrder);
-             status = rand.nextInt(0, 3);   //reset Spike status and random new status.
-        }
 
-        switch (status){
+        int tempOrderNum = calcMethod.getRandIntRange(20,40);
+        switch (spikeStatus){
             case 1:
-                System.out.println("Spike start (Upper)");
-                unitResult = initialOrder + spikeOrder;
+                //scenarioName = "Increasing oder";
+                unitResult = initialOrder + tempOrderNum;
                 break;
             case 2:
-                System.out.println("Spike start (Lower)");
-                unitResult = initialOrder - spikeOrder;
+                //scenarioName = "Decreasing order";
+                unitResult = initialOrder - tempOrderNum;
                 break;
             default:
-                System.out.println("None spike");
+                //scenarioName = "Stay steady";
                 unitResult = initialOrder;
                 break;
 
         }
         return unitResult;
     }
+
 }
