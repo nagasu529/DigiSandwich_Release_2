@@ -35,8 +35,8 @@ public class customerRandomAgent extends Agent {
     int shiftUnit = 0;
     int shiftStatus = 0;        //(shiftStatus,shiftUnit)  =  (0,0) is stable, (0,x) shift up and others shift down.
 
-    int numOfOrder = 100;
-    int initialOrder = 0;
+    int numOfOrder = 0;
+    int initialOrder = 100;
     int dayNumOf = 65;
     int dayTimer = 15000;
     int timePeriod = 0;
@@ -54,6 +54,11 @@ public class customerRandomAgent extends Agent {
         myGui.show();
         //customerInfo.add(getLocalName(),"HamSandwich","general",100,app.selectProductPrice("HamSandwich","general"),0,0,0);
         customerInfo.add(new customerInfo(getLocalName(),"HamSandwich","general",numOfOrder, app.selectProductPrice("HamSandwich","general"),0,0,0));
+
+        //random behaviour for first week
+        customerInfo.get(0).numOfOrder = orderTransactionScenario(calcMethod.getRandIntRange(1,3),initialOrder);
+        System.out.println(calcMethod.getRandIntRange(1,3));
+
 
     	// Register service in the yellow pages
         DFAgentDescription dfd = new DFAgentDescription();
@@ -108,12 +113,15 @@ public class customerRandomAgent extends Agent {
                     switch (testCaseScenario) {
                         case 1:
                             myGui.displayUI((String.format("Week %d  the order behaviour is changed to Increasing order", weekCount)));
+                            customerInfo.get(0).numOfOrder = orderTransactionScenario(testCaseScenario,initialOrder);
                             break;
                         case 2:
                             myGui.displayUI(String.format("Week %d  the order behaviour is changed to Decreasing order", weekCount));
+                            customerInfo.get(0).numOfOrder = orderTransactionScenario(testCaseScenario,initialOrder);
                             break;
                         case 3:
                             myGui.displayUI(String.format("Week %d  the order behaviour is back to steady stage",weekCount));
+                            customerInfo.get(0).numOfOrder = orderTransactionScenario(testCaseScenario,initialOrder);
                             break;
 
                     }
@@ -342,11 +350,11 @@ public class customerRandomAgent extends Agent {
         return unitPerWeek;
     }
 
-    private int orderTransactionScenario(int spikeStatus){
+    private int orderTransactionScenario(int scenarioNum,int initialOrder){
         int unitResult = 0;
 
         int tempOrderNum = calcMethod.getRandIntRange(20,40);
-        switch (spikeStatus){
+        switch (scenarioNum){
             case 1:
                 //scenarioName = "Increasing oder";
                 unitResult = initialOrder + tempOrderNum;
@@ -355,7 +363,7 @@ public class customerRandomAgent extends Agent {
                 //scenarioName = "Decreasing order";
                 unitResult = initialOrder - tempOrderNum;
                 break;
-            default:
+            case 3:
                 //scenarioName = "Stay steady";
                 unitResult = initialOrder;
                 break;

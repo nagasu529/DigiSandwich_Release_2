@@ -38,12 +38,12 @@ public class specialistAgent extends Agent {
     calcMethod calcMethod = new calcMethod();
     DatabaseConn app = new DatabaseConn();
 
-    //Initialize value befor calculation
-    String dailyName = "med-random-Over20SMASP-NormSupply-dailyResult";
-    String weeklyName = "med-random-Over20SMASP-NormSupply-weeklyResult";
+    //Initialize value before calculation
+    String dailyName = "med-random-Over20SMA-NormSupply-dailyResult";
+    String weeklyName = "med-random-Over20SMA-NormSupply-weeklyResult";
 
     //Initial order value stage.
-    double numOfIngradforProduct = 7000;        //Number of product for 2 weeks
+    double numOfIngradforProduct = 14000;        //Number of product for 2 weeks (7000 for 5 users/ 14000 for 10 users)
 
     double numBread = app.selectQuantity("HamSandwich","WhiteBread") * numOfIngradforProduct;
     double numHam = app.selectQuantity("HamSandwich","Ham") * numOfIngradforProduct;
@@ -55,12 +55,12 @@ public class specialistAgent extends Agent {
     //Create CSV classpath.
     //Home PC classpath.
     //IntelliJ
-    //String dailyResult = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    //String weeklyResultPath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
+    String dailyResult = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    String weeklyResultPath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //VSCode
-    String dailyResult = String.format("C:\\Users\\NaGaSu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
-    String weeklyResultPath = String.format("C:\\Users\\NaGaSu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName); 
+    //String dailyResult = String.format("C:\\Users\\NaGaSu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
+    //String weeklyResultPath = String.format("C:\\Users\\NaGaSu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",weeklyName);
 
     //PC Office classpath.
     //String dailyResult = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",dailyName);
