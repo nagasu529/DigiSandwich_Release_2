@@ -94,7 +94,7 @@ public class customerAgent extends Agent {
         addBehaviour(new TickerBehaviour(this, dayTimer){
             protected void onTick() {
                 timePeriod++;
-    
+
                 //Adding the order behaviour (steady, increasing and decreasing)
                 customerInfo.get(0).numOfOrder = spikePeriod(9,numOfOrder,30);
 
@@ -108,7 +108,7 @@ public class customerAgent extends Agent {
                     customerInfo.get(0).numOfOrder = numOfOrder;
                 }
                  */
-                
+
                 myGui.displayUI(String.format("Daily order request: %d \n", customerInfo.get(0).numOfOrder));
 
                 //customerInfo.get(0).numOfOrder = timePeriodShift(shiftStatus, initialOrder,shiftUnit);    //Using when we have spike situation.
