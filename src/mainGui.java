@@ -1,48 +1,83 @@
-
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.function.ObjDoubleConsumer;
+import java.awt.event.*;
 
-public class mainGui extends JFrame{
+public class mainGui extends JFrame {
+    private JTextField inputField1, inputField2, inputField3;
+    private JLabel resultLabel1, resultLabel2, resultLabel3;
 
-    private JFrame frame;
-    //GUI design preferences
-    private JTextArea log;
+    public mainGui() {
+        super("Input Monitor");
 
-    public mainGui(){
-        //Adding Main Frame (Gui)
-        frame = new JFrame("Multi-Agent monitoring");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // create the input fields
+        inputField1 = new JTextField(10);
+        inputField2 = new JTextField(10);
+        inputField3 = new JTextField(10);
 
-        JPanel panel1 = new JPanel();
-        JButton button = new JButton("run");
-        panel1.add(button);
-        frame.add(panel1);
+        // create the result labels
+        resultLabel1 = new JLabel("Result 1: ");
+        resultLabel2 = new JLabel("Result 2: ");
+        resultLabel3 = new JLabel("Result 3: ");
 
-        //log area create
+        // create the button
+        JButton addButton = new JButton("Add");
+        addButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // get the input values
+                int num1 = Integer.parseInt(inputField1.getText());
+                int num2 = Integer.parseInt(inputField2.getText());
+                int num3 = Integer.parseInt(inputField3.getText());
 
-        log = new JTextArea(10,50);
-        log.setEditable(false);
-        getContentPane().add(log, BorderLayout.CENTER);
-        log.setMargin(new Insets(5,5,100,100));
-        JScrollPane logScrollPane = new JScrollPane(log);
-        getContentPane().add(logScrollPane, BorderLayout.CENTER);
-        panel1.add(log);
+                // calculate the results
+                int result1 = num1 + num2;
+                int result2 = num1 + num3;
+                int result3 = num2 + num3;
 
+                // update the result labels
+                resultLabel1.setText("Result 1: " + result1);
+                resultLabel2.setText("Result 2: " + result2);
+                resultLabel3.setText("Result 3: " + result3);
+            }
+        });
+
+        // create a panel for the input fields and button
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new FlowLayout());
+        inputPanel.add(new JLabel("Input 1: "));
+        inputPanel.add(inputField1);
+        inputPanel.add(new JLabel("Input 2: "));
+        inputPanel.add(inputField2);
+        inputPanel.add(new JLabel("Input 3: "));
+        inputPanel.add(inputField3);
+        inputPanel.add(addButton);
+
+        // create a panel for the result labels
+        JPanel resultPanel = new JPanel();
+        resultPanel.setLayout(new GridLayout(3, 1));
+        resultPanel.add(resultLabel1);
+        resultPanel.add(resultLabel2);
+        resultPanel.add(resultLabel3);
+
+        // add the panels to the frame
+        setLayout(new BorderLayout());
+        add(inputPanel, BorderLayout.CENTER);
+        add(resultPanel, BorderLayout.SOUTH);
+
+        // set the size and visibility of the frame
+        setSize(400, 200);
+        setVisible(true);
+
+        // add a WindowListener to stop the program when the GUI is closed
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
     }
 
-    public void show(){
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        int centerX = (int)screenSize.getWidth() / 2;
-        int centerY = (int)screenSize.getHeight() / 2;
-        setLocation(centerX - getWidth() / 2, centerY - getHeight() / 2);
-        frame.setSize(centerX, centerY);
-        frame.setVisible(true);
-    }
-
-    public static void main(String[] args){
-        mainGui myGui = new mainGui();
-        myGui.show();
+    public static void main(String[] args) {
+        mainGui inputMonitor = new mainGui();
     }
 }

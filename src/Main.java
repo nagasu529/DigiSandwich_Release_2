@@ -2,7 +2,7 @@ import jade.Boot;
 
 public class Main {
     public static void main(String[] args){
-        int customerSize = 10;
+        int customerSize = 3;
         StringBuilder customerStartText = new StringBuilder();
         for (int i = 0; i < customerSize; i++){
             //String tempText = String.format("customer%d:agent.raynorCustomerAgent;",i + 1);       //Row data from Raynor's
