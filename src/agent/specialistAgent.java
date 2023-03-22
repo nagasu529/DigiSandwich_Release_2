@@ -562,7 +562,6 @@ public class specialistAgent extends Agent {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
     }
 

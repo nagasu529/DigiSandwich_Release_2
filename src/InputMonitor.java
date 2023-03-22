@@ -12,32 +12,32 @@ public class InputMonitor extends JFrame {
     private JTextArea resultArea1, resultArea2, resultArea3;
 
     public InputMonitor() {
-        super("Input Monitor");
+        super("Multi-agent monitoring");
 
         // create the input fields
         inputField1 = new JTextField(10);
         inputField2 = new JTextField(10);
-        inputField3 = new JTextField(10);
+        //inputField3 = new JTextField(10);
 
         // create the result areas
         resultArea1 = new JTextArea(5, 20);
         resultArea1.setEditable(false);
         resultArea1.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Result 1"),
+                BorderFactory.createTitledBorder("Ingredient usage (Daily)"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
         resultArea2 = new JTextArea(5, 20);
         resultArea2.setEditable(false);
         resultArea2.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Result 2"),
+                BorderFactory.createTitledBorder("Daily order summary:"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
         resultArea3 = new JTextArea(5, 20);
         resultArea3.setEditable(false);
         resultArea3.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createTitledBorder("Result 3"),
+                BorderFactory.createTitledBorder("Current stock (Daily)"),
                 BorderFactory.createEmptyBorder(5, 5, 5, 5)
         ));
 
@@ -105,8 +105,8 @@ public class InputMonitor extends JFrame {
         inputPanel.add(inputField1);
         inputPanel.add(new JLabel("Input 2:"));
         inputPanel.add(inputField2);
-        inputPanel.add(new JLabel("Input 3:"));
-        inputPanel.add(inputField3);
+        //inputPanel.add(new JLabel("Input 3:"));
+        //inputPanel.add(inputField3);
         inputPanel.add(addButton);
         inputPanel.add(saveButton);
 
