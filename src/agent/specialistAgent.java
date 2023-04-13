@@ -287,18 +287,24 @@ public class specialistAgent extends Agent {
                 serviceSender.addReceiver(supplierAgent[i]);
             }
 
-            int overEstPct = 20;
+            int overEstPct = 0;      //The percentage of overestimation for calculation (0 is no overestimation)
             int windowSize = 2;
 
+            /*Standard Optimization is default, We can add "//" on it and going to delete "//" on SMA Method if we want to use SMA optimization on Specialist agent.
+            In refilledStock method, specialist agent will optimize the ingredients stock on weekly basis.
+             */
+
+
             //Standard Optimization
-            //double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
-            //double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
-            //double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
+
+            double breadNeed = standardOptimzation(overEstPct,"WhiteBread", weeklyResult);
+            double hamNeed = standardOptimzation(overEstPct,"Ham", weeklyResult);
+            double spreadNeed = standardOptimzation(overEstPct,"Spread",weeklyResult);
 
             //SMA
-            double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
-            double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
-            double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
+            //double breadNeed = smaOptimaization(windowSize,overEstPct,"WhiteBread",weeklyResult);
+            //double hamNeed = smaOptimaization(windowSize,overEstPct,"Ham",weeklyResult);
+            //double spreadNeed = smaOptimaization(windowSize,overEstPct,"Spread",weeklyResult);
 
             //Chartist
             //double breadNeed = chartistOpt(overEstPct,"WhiteBread",weeklyResult);
