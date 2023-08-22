@@ -412,10 +412,14 @@ public class supplierAgent extends Agent {
     private class refilledStock extends OneShotBehaviour {
         public void action(){
             //Initialize
-            int percentage = 0;
-            int windowSize = 2;
+            int percentage = 0;     //The percentage of overestimation for calculation (0 is no overestimation)
+            int windowSize = 2;     //Window size is used for SMA and SMA Overestimation
 
-            //Standard Optimization
+            /*Standard Optimization is default, We can add "//" on it and going to delete "//" on SMA Method if we want to use SMA optimization on Specialist agent.
+            In refilledStock method, specialist agent will optimize the ingredients stock on weekly basis.
+             */
+
+
             double breadNeed = standardOptMethod(percentage,"WhiteBread",stockOfIngredients);
             double hamNeed = standardOptMethod(percentage,"Ham",stockOfIngredients);
             double spreadNeed = standardOptMethod(percentage,"Spread",stockOfIngredients);
