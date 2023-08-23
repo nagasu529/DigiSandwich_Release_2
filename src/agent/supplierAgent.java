@@ -45,9 +45,9 @@ public class supplierAgent extends Agent {
 
     //Home PC classpath
     //IntelliJ
-    String supplierStockClasspath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    String ingredientReqClasspath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    String refillStockClasspath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    //String supplierStockClasspath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    //String ingredientReqClasspath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    //String refillStockClasspath = String.format("C:\\Users\\NaGaSu\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //VSCode
     //String supplierStockClasspath = String.format("C:\\Users\\NaGasu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
@@ -55,9 +55,9 @@ public class supplierAgent extends Agent {
     //String refillStockClasspath = String.format("C:\\Users\\NaGasu\\VSCodeProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //NB Office classpath
-    //String supplierStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
-    //String ingredientReqClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
-    //String refillStockClasspath = String.format("C:\\Users\\KChiewchanadmin\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
+    String supplierStockClasspath = String.format("C:\\Users\\LENOVO\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);
+    String ingredientReqClasspath = String.format("C:\\Users\\LENOVO\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",ingredientReq);
+    String refillStockClasspath = String.format("C:\\Users\\LENOVO\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",refillStock);
 
     //PC Office classpath
     //String supplierStockClasspath = String.format("C:\\Users\\kitti\\IdeaProjects\\DigiSandwich_Release_2\\output\\%s.csv",supplierStock);

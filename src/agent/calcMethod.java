@@ -937,6 +937,15 @@ public class calcMethod {
     	return output;
     }
 
+    public double ingradOptimization(double previousUsedAvg, double lastweekOrderAvg){
+        double result = 0.0;
+        if(lastweekOrderAvg == previousUsedAvg){
+            result = lastweekOrderAvg;
+        }
+
+        return result;
+    }
+
     public void orderTransactionReq(String orderName, String grade, int numOfOrder, ArrayList<calcMethod.orderTransaction> resultArray){
         //System.out.print("requst to write the order requirement transaction");
         switch(orderName){
